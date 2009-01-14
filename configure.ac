@@ -6,6 +6,10 @@ AM_MAINTAINER_MODE
 
 AM_CONFIG_HEADER(config.h)
 
+# Disable static libraries by default.  Use --enable-static if you really want
+# them.
+AC_DISABLE_STATIC
+
 # Check for programs.
 AC_PROG_CC
 AC_PROG_CXX

@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libvdpau_trace.la
 libvdpau_trace_la_SOURCES = \
     vdpau_trace.cpp
 
-libvdpau_trace_la_LDFLAGS = -version-info 1:0:0 -no-undefined
+libvdpau_trace_la_LDFLAGS = -avoid-version -module -no-undefined
 
 libvdpau_traceincludedir = $(includedir)/vdpau
 libvdpau_traceinclude_HEADERS = \
