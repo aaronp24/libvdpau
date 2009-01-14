@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../include/vdpau/vdpau_x11.h"
+#include <vdpau/vdpau_x11.h>
 
 typedef void SetDllHandle(
     void * driver_dll_handle
