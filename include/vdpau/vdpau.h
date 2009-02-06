@@ -1998,8 +1998,8 @@ typedef VdpStatus VdpOutputSurfaceRenderOutputSurface(
 );
 
 /**
- * \brief Composite a sub-rectangle of a \ref VdpOutputSurface
- *        "VdpOutputSurface" into a sub-rectangle of another
+ * \brief Composite a sub-rectangle of a \ref VdpBitmapSurface
+ *        "VdpBitmapSurface" into a sub-rectangle of a
  *        \ref VdpOutputSurface VdpOutputSurface.
  * \param[in] destination_surface The destination surface of the
  *       compositing operation.
