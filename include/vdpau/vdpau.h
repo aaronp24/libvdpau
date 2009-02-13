@@ -2564,8 +2564,10 @@ typedef struct {
      */
     uint8_t syncmarker;
     /**
-     * Copy of the VC-1 bitstream field. See VC-1 J.1.17.
+     * VC-1 SP/MP range reduction control.
      * Only used by simple and main profiles.
+     * Bit 0: Copy of rangered VC-1 bitstream field; See VC-1 J.1.17.
+     * Bit 1: Copy of rangeredfrm VC-1 bitstream fiels; See VC-1 7.1.13.
      */
     uint8_t rangered;
     /**
