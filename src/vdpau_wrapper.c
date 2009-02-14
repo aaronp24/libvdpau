@@ -80,6 +80,7 @@ VdpStatus vdp_device_create_x11(
     backend_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
     free(vdpau_driver_lib);
     if (!backend_dll) {
+        fprintf(stderr, "Failed to open VDPAU backend %s\n", dlerror());
         _VDP_ERROR_BREAKPOINT();
         return VDP_STATUS_NO_IMPLEMENTATION;
     }
@@ -91,6 +92,7 @@ VdpStatus vdp_device_create_x11(
 
         trace_dll = dlopen("libvdpau_trace.so", RTLD_NOW | RTLD_GLOBAL);
         if (!trace_dll) {
+            fprintf(stderr, "Failed to open VDPAU trace library %s\n", dlerror());
             _VDP_ERROR_BREAKPOINT();
             return VDP_STATUS_NO_IMPLEMENTATION;
         }
@@ -100,6 +102,7 @@ VdpStatus vdp_device_create_x11(
             "vdp_trace_set_backend_handle"
         );
         if (!set_dll_handle) {
+            fprintf(stderr, "%s\n", dlerror());
             _VDP_ERROR_BREAKPOINT();
             return VDP_STATUS_NO_IMPLEMENTATION;
         }
@@ -119,6 +122,7 @@ VdpStatus vdp_device_create_x11(
         func_name
     );
     if (!vdp_imp_device_create_x11) {
+        fprintf(stderr, "%s\n", dlerror());
         _VDP_ERROR_BREAKPOINT();
         return VDP_STATUS_NO_IMPLEMENTATION;
     }
