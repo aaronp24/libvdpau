@@ -345,106 +345,253 @@
  *  
  * \subsection video_surface_content VdpVideoSurface Content 
  *  
- * Each \ref VdpVideoSurface "VdpVideoSurface" is expected to 
- * contain an entire frame's-worth of data, irrespective of 
- * whether an interlaced of progressive sequence is being 
- * decoded. 
+ * Each \ref VdpVideoSurface "VdpVideoSurface" is expected to contain an
+ * entire frame's-worth of data, irrespective of whether an interlaced of
+ * progressive sequence is being decoded. 
  *  
- * Depending on the exact encoding structure of the compressed 
- * video stream, the application may need to call \ref 
- * VdpDecoderRender twice to fill a single \ref VdpVideoSurface 
- * "VdpVideoSurface". When the stream contains an encoded 
- * progressive frame, or a "frame coded" interlaced field-pair, 
- * a single \ref VdpDecoderRender call will fill the entire 
- * surface. When the stream contains separately encoded 
- * interlaced fields, two \ref VdpDecoderRender calls will be 
- * required; one for the top field, and one for the bottom 
- * field. 
+ * Depending on the exact encoding structure of the compressed video stream,
+ * the application may need to call \ref VdpDecoderRender twice to fill a
+ * single \ref VdpVideoSurface "VdpVideoSurface". When the stream contains an
+ * encoded progressive frame, or a "frame coded" interlaced field-pair, a
+ * single \ref VdpDecoderRender call will fill the entire surface. When the
+ * stream contains separately encoded interlaced fields, two
+ * \ref VdpDecoderRender calls will be required; one for the top field, and
+ * one for the bottom field. 
  *  
- * Implementation note: When \ref VdpDecoderRender renders an 
- * interlaced field, this operation must not disturb the content 
- * of the other field in the surface. 
+ * Implementation note: When \ref VdpDecoderRender renders an interlaced
+ * field, this operation must not disturb the content of the other field in
+ * the surface. 
  *  
- * \subsection vm_render_surfaces VdpVideoMixerRender surface list
- *  
- * The \ref VdpVideoMixerRender API receives \ref VdpVideoSurface 
- * "VdpVideoSurface" IDs for any number of fields/frames. The 
- * application should strive to provide as many fields/frames as
- * practical, to enable advanced video processing 
- * algorithms. At a minimum, the current field/frame must be 
- * provided. It is recommended that at least 2 past and 1 future 
- * frame be provided in all cases. 
- *  
- * Note that it is entirely possible, in general, for any of the 
- * \ref VdpVideoMixer "VdpVideoMixer" post-processing steps to 
- * require access to multiple input fields/frames. 
- *  
- * It is legal for an application not to provide some or all of
- * the surfaces other than the "current" surface. Note that this 
- * may cause degraded operation of the \ref VdpVideoMixer 
- * "VdpVideoMixer" algorithms. However, this may be required in 
- * the case of temporary file or network read errors, decode 
- * errors, etc. 
- *  
- * When an application chooses not to provide a particular 
- * surface to \ref VdpVideoMixerRender, then this "slot" in the 
- * surface list must be filled with the special value \ref 
- * VDP_INVALID_HANDLE, to explicitly indicate that the picture 
- * is missing; do not simply shuffle other surfaces together to 
- * fill in the gap. 
- *  
- * The \ref VdpVideoMixerRender parameter \b 
- * current_picture_structure applies to \b 
- * video_surface_current. The picture structure for the other 
- * surfaces will be automatically derived from that for the 
- * current picture as detailed below.
- *  
- * If \b current_picture_structure is \ref 
- * VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME, then all surfaces are 
- * assumed to be frames. Otherwise, the picture structure is 
- * assumed to alternate between top and bottom field, anchored 
- * against \b current_picture_structure and \b 
- * video_surface_current. 
- *  
- * \subsection deinterlacing Applying de-interlacing
- *  
- * Note that \ref VdpVideoMixerRender disables de-interlacing 
- * when \b current_picture_structure is \ref 
- * VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME; frames by definition 
- * need no de-interlacing. 
- *  
- * Weave de-interlacing may be obtained by giving the video 
- * mixer a surface containing two interlaced fields, but 
- * informing the \ref VdpVideoMixer "VdpVideoMixer" that the 
- * surface has \ref VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME. 
- *  
- * Bob de-interlacing is the default for interlaced content. 
- * More advanced de-interlacing techniques may be available, 
- * depending on the implementation. Such features need to be 
- * requested when creating the \ref VdpVideoMixer "VdpVideoMixer",
- * and subsequently enabled. 
- *  
- * If the source material is marked progressive, two options are 
- * available for \ref VdpVideoMixerRender usage: 
- *  
- * -# Simply pass the allegedly progressive frames through the 
- *    mixer, marking them as progressive. This equates to a
- *    so-called "flag following" mode.
- * -# Apply any pulldown flags in the stream, yielding a higher 
- *    rate stream of interlaced fields. These should then be
- *    passed through the mixer, marked as fields, with
- *    de-interlacing enabled, and inverse telecine optionally
- *    enabled. This should allow for so-called "bad edit"
- *    detection. However, it requires more processing power from
- *    the hardware.
- *  
- * If the source material is marked interlaced, the decoded 
- * interlaced fields should always be marked as fields when 
- * processing them with the mixer. Some de-interlacing 
- * algorithm is then always applied. Inverse telecine may be 
- * useful in cases where some portions, or all of, the 
- * interlaced stream is telecined film. 
- *  
+ * \subsection vm_surf_list VdpVideoMixer Surface List
+ *
+ * An video stream is logically composed of a sequence of fields. An
+ * example is shown below, in display order, assuming top field first:
+ *
+ * <pre>t0 b0 t1 b1 t2 b2 t3 b3 t4 b4 t5 b5 t6 b6 t7 b7 t8 b8 t9 b9</pre>
+ *
+ * The canonical usage is to call \ref VdpDecoderRender once for decoded
+ * field, in display order, to yield one post-processed frame for display.
+ *
+ * For each call to \ref VdpDecoderRender, the field to be processed should be
+ * provided as the \b video_surface_current parameter.
+ *
+ * To enable operation of advanced de-interlacing algorithms and/or
+ * post-processing algorithms, some past and/or future surfaces should be
+ * provided as context. These are provided in the \b video_surface_past and
+ * \b video_surface_future lists. In general, these lists may contain any
+ * number of surfaces. Specific implementations may have specific requirements
+ * determining the minimum required number of surfaces for optimal operation,
+ * and the maximum number of useful surfaces, beyond which surfaces are not
+ * used. It is recommended that in all cases other than plain bob/weave, at
+ * least 2 past and 1 future frame be provided. 
+ *
+ * Note that it is entirely possible, in general, for any of the
+ * \ref VdpVideoMixer "VdpVideoMixer" post-processing steps other than
+ * de-interlacing to require access to multiple input fields/frames. For
+ * example, an motion-sensitive noise-reduction algorithm.
+ *
+ * For example, when processing field t4, the \ref VdpDecoderRender parameters
+ * may contain the following values, if the application chose to provide 3
+ * fields of context for both the past and future:
+ *
+ * <pre>
+ * current_picture_structure: VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD
+ * past:    [b3, t3, b2]
+ * current: t4
+ * future:  [b4, t5, b5]
+ * </pre>
+ *
+ * Note that for both the past/future lists, array index 0 represents the
+ * field temporally closest to current, in display order.
+ *
+ * The \ref VdpVideoMixerRender parameter \b current_picture_structure applies
+ * to \b video_surface_current. The picture structure for the other surfaces
+ * will be automatically derived from that for the current picture. The
+ * derivation algorithm is extremely simple; the concatenated list
+ * past/current/future is simply assumed to have an alternating top/bottom
+ * pattern throughout.
+ *
+ * Continuing the example above, subsequent calls to \ref VdpVideoMixerRender
+ * would provide the following sets of parameters:
+ *
+ * <pre>
+ * current_picture_structure: VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD
+ * past:    [t4, b3, t3]
+ * current: b4
+ * future:  [t5, b5, t6]
+ * </pre>
+ *
+ * then:
+ * 
+ * <pre>
+ * current_picture_structure: VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD
+ * past:    [b4, t4, b3]
+ * current: t5
+ * future:  [b5, t6, b7]
+ * </pre>
+ *
+ * In other words, the concatenated list of past/current/future frames simply
+ * forms a window that slides through the sequence of decoded fields.
+ *
+ * It is syntactically legal for an application to choose not to provide a
+ * particular entry in the past or future lists. In this case, the "slot" in
+ * the surface list must be filled with the special value
+ * \ref VDP_INVALID_HANDLE, to explicitly indicate that the picture is
+ * missing; do not simply shuffle other surfaces together to fill in the gap.
+ * Note that entries should only be omitted under special circumstances, such
+ * as failed decode due to bitstream error during picture header parsing,
+ * since missing entries will typically cause advanced de-interlacing
+ * algorithms to experience significantly degraded operation.
+ *
+ * Specific examples for different de-interlacing types are presented below.
+ *
+ * \subsection deint_weave Weave De-interlacing
+ *
+ * Weave de-interlacing is the act of interleaving the lines of two temporally
+ * adjacent fields to form a frame for display.
+ *
+ * To disable de-interlacing for progressive streams, simply specify
+ * \b current_picture_structure as \ref VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
+ * no de-interlacing will be applied.
+ *
+ * Weave de-interlacing for interlaced streams is identical to disabling
+ * de-interlacing, as describe immediately above, because each
+ * \ref VdpVideoSurface already contains an entire frame's worth (i.e. two
+ * fields) of picture data.
+ *
+ * Inverse telecine is disabled when using weave de-interlacing.
+ *
+ * Weave de-interlacing produces one output frame for each input frame. The
+ * application should make one \ref VdpVideoMixerRender call per pair of
+ * decoded fields, or per decoded frame.
+ *
+ * Weave de-interlacing requires no entries in the past/future lists.
+ *
+ * All implementations must support weave de-interlacing.
+ *
+ * \subsection deint_bob Bob De-interlacing
+ *
+ * Bob de-interlacing is the act of vertically scaling a single field to the
+ * size of a single frame.
+ *
+ * To achieve bob de-interlacing, simply provide a single field as
+ * \b video_surface_current, and set \b current_picture_structure
+ * appropriately, to indicate whether a top or bottom field was provided.
+ *
+ * Inverse telecine is disabled when using bob de-interlacing.
+ *
+ * Bob de-interlacing produces one output frame for each input field. The
+ * application should make one \ref VdpVideoMixerRender call per decoded
+ * field.
+ *
+ * Bob de-interlacing requires no entries in the past/future lists.
+ *
+ * Bob de-interlacing is the default when no advanced method is requested and
+ * enabled. Advanced de-interlacing algorithms may fall back to bob e.g. when
+ * required past/future fields are missing.
+ * 
+ * All implementations must support bob de-interlacing.
+ *
+ * \subsection deint_adv Advanced De-interlacing
+ *
+ * Operation of both temporal and temporal-spatial de-interlacing is
+ * identical; the only difference is the internal processing the algorithm
+ * performs in generating the output frame.
+ *
+ * These algorithms use various advanced processing on the pixels of both the
+ * current and various past/future fields in order to determine how best to
+ * de-interlacing individual portions of the image.
+ *
+ * Inverse telecine may be enabled when using advanced de-interlacing.
+ *
+ * Advanced de-interlacing produces one output frame for each input field. The
+ * application should make one \ref VdpVideoMixerRender call per decoded
+ * field.
+ *
+ * Advanced de-interlacing requires entries in the past/future lists.
+ *
+ * Availability of advanced de-interlacing algorithms is implementation
+ * dependent.
+ *
+ * \subsection deint_rate De-interlacing Rate
+ *
+ * For all de-interlacing algorithms except weave, a choice may be made to
+ * call \ref VdpVideoMixerRender for either each decoded field, or every
+ * second decoded field.
+ *
+ * If \ref VdpVideoMixerRender is called for every decoded field, the
+ * generated post-processed frame rate is equal to the decoded field rate.
+ * Put another way, the generated post-processed nominal field rate is equal
+ * to 2x the decoded field rate. This is standard practice.
+ *
+ * If \ref VdpVideoMixerRender is called for every second decoded field (say
+ * every top field), the generated post-processed frame rate is half to the
+ * decoded field rate. This mode of operation is thus referred to as
+ * "half-rate".
+ *
+ * Implementations may choose whether to support half-rate de-interlacing mode
+ * or not. Regular de-interlacing mode should be supported to any supported
+ * advanced de-interlacing algorithm.
+ *
+ * The descriptions of de-interlacing algorithms above assume that regular
+ * (not half-rate) operation is being performed, when detailing the number of
+  "half-rate" de-interlacing is used.deoMixerRender calls.
+ *
+ * Recall that the concatenation of past/current/future surface lists simply
+ * forms a window into the stream of decoded fields. To achieve standard
+ * de-interlacing, the window is slid through the list of decoded fields one
+ * field at a time, and a call is made to \ref VdpVideoMixerRender for each
+ * movement of the window. To achieve half-rate de-interlacing, the window is
+ * slid through the* list of decoded fields two fields at a time, and a
+ * call is made to \ref VdpVideoMixerRender for each movement of the window.
+ *
+ * \subsection invtc Inverse Telecine
+ *
+ * Assuming the implementation supports it, inverse telecine may be enabled
+ * alongside any advanced de-interlacing algorithm. Inverse telecine is never
+ * active for bob or weave.
+ *
+ * Operation of \ref VdpVideoMixerRender with inverse telecine active is
+ * identical to the basic operation mechanisms describe above in every way;
+ * all inverse telecine processing is performed internally to the
+ * \ref VdpVideoMixer "VdpVideoMixer".
+ *
+ * In particular, there is no provision way for \ref VdpVideoMixerRender to
+ * indicate when identical input fields have been observed, and consequently
+ * identical output frames may have been produced.
+ *
+ * De-interlacing (and inverse telecine) may be applied to streams that are
+ * marked as being progressive. This will allow detection of, and correct
+ * de-interlacing of, mixed interlace/progressive streams, bad edits, etc.
+ * To implement de-interlacing/inverse-telecine on progressive material,
+ * simply treat the stream of decoded frames as a stream of decoded fields,
+ * apply any telecine flags (see the next section), and then apply
+ * de-interlacing to those fields as described above.
+ *
+ * Implementations are free to determine whether inverse telecine operates
+ * in conjunction with half-rate de-interlacing or not. It should always
+ * operate with regular de-interlacing, when advertized.
+ *
+ * \subsection tcflags Telecine (Pull-Down) Flags
+ *
+ * Some media delivery formats, e.g. DVD-Video, include flags that are
+ * intended to modify the decoded field sequence before display. This allows
+ * e.g. 24p content to be encoded at 48i, which saves space relative to a 60i
+ * encoded stream, but still displayed at 60i, to match target consumer
+ * display equipment.
+ *
+ * If the inverse telecine option is not activated in the
+ * \ref VdpVideoMixer "VdpVideoMixer", these flags should be ignored, and the
+ * decoded fields passed directly to \ref VdpVideoMixerRender as detailed
+ * above.
+ *
+ * However, to make full use of the inverse telecine feature, these flags
+ * should be applied to the field stream, yielding another field stream with
+ * some repeated fields, before passing the field stream to
+ * \ref VdpVideoMixerRender. In this scenario, the sliding window mentioned
+ * in the descriptions above applies to the field stream after application of
+ * flags.
+ *
  * \section extending Extending the API 
  * 
  * \subsection extend_enums Enumerations and Other Constants
@@ -2779,7 +2926,7 @@ typedef uint32_t VdpVideoMixerParameter;
  * \hideinitializer 
  * \brief The exact width of input video surfaces. 
  *  
- * This attribute's type is uint32_t. 
+ * This parameter's type is uint32_t. 
  *  
  * This parameter defaults to 0 if not specified, which entails 
  * that it must be specified. 
@@ -2792,7 +2939,7 @@ typedef uint32_t VdpVideoMixerParameter;
  * \hideinitializer 
  * \brief The exact height of input video surfaces. 
  *  
- * This attribute's type is uint32_t. 
+ * This parameter's type is uint32_t. 
  *  
  * This parameter defaults to 0 if not specified, which entails 
  * that it must be specified. 
@@ -2806,7 +2953,7 @@ typedef uint32_t VdpVideoMixerParameter;
  * \brief The chroma type of the input video surfaces the will 
  *        process.
  *  
- * This attribute's type is VdpChromaType.
+ * This parameter's type is VdpChromaType.
  *  
  * If not specified, this parameter defaults to
  * VDP_CHROMA_TYPE_420. 
@@ -2944,6 +3091,21 @@ typedef uint32_t VdpVideoMixerAttribute;
  * However, the range is fixed as 0.0...1.0. 
  */ 
 #define VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MAX_LUMA     (VdpVideoMixerAttribute)5
+/** 
+ * \hideinitializer 
+ * \brief Whether de-interlacers should operate solely on luma, and bob chroma.
+ *  
+ * Note: This attribute only affects advanced de-interlacing algorithms, not
+ * bob or weave.
+ *
+ * This attribute's type is uint8_t.
+ *  
+ * This parameter defaults to 0.
+ *  
+ * The application may query this parameter's supported range. 
+ * However, the range is fixed as 0 (no/off) ... 1 (yes/on). 
+ */ 
+#define VDP_VIDEO_MIXER_ATTRIBUTE_SKIP_CHROMA_DEINTERLACE (VdpVideoMixerAttribute)6
 
 /**
  * \brief Query the implementation's support for a specific 
