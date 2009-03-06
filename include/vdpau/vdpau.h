@@ -369,11 +369,11 @@
  *
  * <pre>t0 b0 t1 b1 t2 b2 t3 b3 t4 b4 t5 b5 t6 b6 t7 b7 t8 b8 t9 b9</pre>
  *
- * The canonical usage is to call \ref VdpDecoderRender once for decoded
+ * The canonical usage is to call \ref VdpVideoMixerRender once for decoded
  * field, in display order, to yield one post-processed frame for display.
  *
- * For each call to \ref VdpDecoderRender, the field to be processed should be
- * provided as the \b video_surface_current parameter.
+ * For each call to \ref VdpVideoMixerRender, the field to be processed should
+ * be provided as the \b video_surface_current parameter.
  *
  * To enable operation of advanced de-interlacing algorithms and/or
  * post-processing algorithms, some past and/or future surfaces should be
@@ -390,9 +390,9 @@
  * de-interlacing to require access to multiple input fields/frames. For
  * example, an motion-sensitive noise-reduction algorithm.
  *
- * For example, when processing field t4, the \ref VdpDecoderRender parameters
- * may contain the following values, if the application chose to provide 3
- * fields of context for both the past and future:
+ * For example, when processing field t4, the \ref VdpVideoMixerRender
+ * parameters may contain the following values, if the application chose to
+ * provide 3 fields of context for both the past and future:
  *
  * <pre>
  * current_picture_structure: VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD
