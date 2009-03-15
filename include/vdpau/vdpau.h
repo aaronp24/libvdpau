@@ -340,7 +340,93 @@
  * precise pixel layout is included with the documentation of 
  * each surface type. For example, see \ref 
  * VDP_RGBA_FORMAT_B8G8R8A8. 
- *  
+ *
+ * \section video_decoder_usage Video Decoder Usage
+ *
+ * VDPAU is a slice-level API. Put another way, VDPAU implementations accept
+ * "slice" data from the bitstream, and perform all required processing of
+ * those slices (e.g VLD decoding, IDCT, motion compensation, in-loop
+ * deblocking, etc.).
+ *
+ * The client application is responsible for:
+ *
+ * - Extracting the slices from the bitstream (e.g. parsing/demultiplexing
+ *   container formats, scanning the data to determine slice start positions
+ *   and slice sizes).
+ * - Parsing various bitstream headers/structures (e.g. sequence header,
+ *   sequence parameter set, picture parameter set, entry point structures,
+ *   etc.) Various fields from the parsed header structures needs to be
+ *   provided to VDPAU alongside the slice bitstream in a "picture info"
+ *   structure.
+ * - Surface management (e.g. H.264 DPB processing, display re-ordering)
+ *
+ * It is recommended that applications pass solely the slice data to VDPAU;
+ * specifically that any header data structures be excluded from the portion
+ * of the bitstream passed to VDPAU. VDPAU implementations must operate
+ * correctly if non-slice data is included, at least for formats employing
+ * start codes to delimit slice data. However, any extra data may need
+ * to be uploaded to hardware for parsing thus lowering performance, and/or,
+ * in the worst case, may even overflow internal buffers that are sized solely
+ * for slice data.
+ *
+ * The exact data that should be passed to VDPAU is detailed below for each
+ * supported format:
+ *
+ * \subsection MPEG-1 and MPEG-2
+ *
+ * Include all slices beginning with start codes 0x00000101 through
+ * 0x000001AF. The slice start code must be included for all slices.
+ *
+ * \subsection H.264
+ *
+ * Include all NALs with nal_unit_type of 1 or 5 (coded slice of non-IDR/IDR
+ * picture respectively). The complete slice start code (including 0x000001
+ * prefix) must be included for all slices, even when the prefix is not
+ * included in the bitstream.
+ *
+ * Note that if desired:
+ *
+ * - The slice start code prefix may be included in a separate bitstream
+ *   buffer array entry to the actual slice data extracted from the bitstream.
+ * - Multiple bitstream buffer array entries (e.g. one per slice) may point at
+ *   the same physical data storage for the slice start code prefix. 
+ *
+ * \subsection VC-1 Simple and Main Profile
+ *
+ * VC-1 simple/main profile bitstreams always consist of a single slice per
+ * picture, and do not use start codes to delimit pictures. Instead, the
+ * container format must indicate where each picture begins/ends.
+ *
+ * As such, no slice start codes should be included in the data passed to
+ * VDPAU; simply pass in the exact data from the bitstream.
+ *
+ * Header information contained in the bitstream should be parsed by the
+ * application and passed to VDPAU using the "picture info" data structure;
+ * this header information explicitly must not be included in the bitstream
+ * data passed to VDPAU for this encoding format.
+ *
+ * \subsection VC-1 Advanced Profile
+ *
+ * Include all slices beginning with start codes 0x0000010D (frame),
+ * 0x0000010C (field) or 0x0000010B (slice). The slice start code should be
+ * included in all cases.
+ *
+ * Some VC-1 advanced profile streams do not contain slice start codes; again,
+ * the container format must indicate where picture data begins and ends. In
+ * this case, pictures are assumed to be progressive and to contain a single
+ * slice. It is highly recommended that applications detect this condition,
+ * and add the missing start codes to the bitstream passed to VDPAU. However,
+ * VDPAU implementations must allow bitstreams with missing start codes, and
+ * act as if a 0x0000010D (frame) start code had been present.
+ *
+ * Note that pictures containing multiple slices, or interlace streams, must
+ * contain a complete set of slice start codes in the original bitstream;
+ * without them, it is not possible to correctly parse and decode the stream.
+ *
+ * The bitstream passed to VDPAU should contain all original emulation
+ * prevention bytes present in the original bitstream; do not remove these
+ * from the bitstream.
+ *
  * \section video_mixer_usage Video Mixer Usage
  *  
  * \subsection video_surface_content VdpVideoSurface Content 
