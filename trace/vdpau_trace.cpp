@@ -269,63 +269,181 @@ static void _vdp_cap_dump_picture_info(
     VdpPictureInfo const * picture_info
 )
 {
-    VdpPictureInfoMPEG1Or2 const * picture_info_mpeg1or2;
-
     switch (profile) {
     case VDP_DECODER_PROFILE_MPEG1:
     case VDP_DECODER_PROFILE_MPEG2_SIMPLE:
     case VDP_DECODER_PROFILE_MPEG2_MAIN:
-        picture_info_mpeg1or2 = (VdpPictureInfoMPEG1Or2 const *)picture_info;
+        {
+            VdpPictureInfoMPEG1Or2 const * picture_info_mpeg1or2 =
+                (VdpPictureInfoMPEG1Or2 const *)picture_info;
 
-        fprintf(
-            _vdp_cap_data.fp,
-            "{%u, %u, %u, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, {{%d, %d}, {%d, %d}}, {",
-            picture_info_mpeg1or2->forward_reference,
-            picture_info_mpeg1or2->backward_reference,
-            picture_info_mpeg1or2->slice_count,
-            picture_info_mpeg1or2->picture_structure,
-            picture_info_mpeg1or2->picture_coding_type,
-            picture_info_mpeg1or2->intra_dc_precision,
-            picture_info_mpeg1or2->frame_pred_frame_dct,
-            picture_info_mpeg1or2->concealment_motion_vectors,
-            picture_info_mpeg1or2->intra_vlc_format,
-            picture_info_mpeg1or2->alternate_scan,
-            picture_info_mpeg1or2->q_scale_type,
-            picture_info_mpeg1or2->top_field_first,
-            picture_info_mpeg1or2->full_pel_forward_vector,
-            picture_info_mpeg1or2->full_pel_backward_vector,
-            picture_info_mpeg1or2->f_code[0][0],
-            picture_info_mpeg1or2->f_code[0][1],
-            picture_info_mpeg1or2->f_code[1][0],
-            picture_info_mpeg1or2->f_code[1][1]
-        );
-        for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_mpeg1or2->intra_quantizer_matrix); ++i) {
             fprintf(
                 _vdp_cap_data.fp,
-                "%s%d",
-                (i == 0) ? "" : ", ",
-                picture_info_mpeg1or2->intra_quantizer_matrix[i]
+                "{%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, {{%u, %u}, {%u, %u}}, {",
+                picture_info_mpeg1or2->forward_reference,
+                picture_info_mpeg1or2->backward_reference,
+                picture_info_mpeg1or2->slice_count,
+                (uint32_t)picture_info_mpeg1or2->picture_structure,
+                (uint32_t)picture_info_mpeg1or2->picture_coding_type,
+                (uint32_t)picture_info_mpeg1or2->intra_dc_precision,
+                (uint32_t)picture_info_mpeg1or2->frame_pred_frame_dct,
+                (uint32_t)picture_info_mpeg1or2->concealment_motion_vectors,
+                (uint32_t)picture_info_mpeg1or2->intra_vlc_format,
+                (uint32_t)picture_info_mpeg1or2->alternate_scan,
+                (uint32_t)picture_info_mpeg1or2->q_scale_type,
+                (uint32_t)picture_info_mpeg1or2->top_field_first,
+                (uint32_t)picture_info_mpeg1or2->full_pel_forward_vector,
+                (uint32_t)picture_info_mpeg1or2->full_pel_backward_vector,
+                (uint32_t)picture_info_mpeg1or2->f_code[0][0],
+                (uint32_t)picture_info_mpeg1or2->f_code[0][1],
+                (uint32_t)picture_info_mpeg1or2->f_code[1][0],
+                (uint32_t)picture_info_mpeg1or2->f_code[1][1]
             );
+            for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_mpeg1or2->intra_quantizer_matrix); ++i) {
+                fprintf(
+                    _vdp_cap_data.fp,
+                    "%s%u",
+                    (i == 0) ? "" : ", ",
+                    (uint32_t)picture_info_mpeg1or2->intra_quantizer_matrix[i]
+                );
+            }
+            fputs("}, {", _vdp_cap_data.fp);
+            for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_mpeg1or2->non_intra_quantizer_matrix); ++i) {
+                fprintf(
+                    _vdp_cap_data.fp,
+                    "%s%u",
+                    (i == 0) ? "" : ", ",
+                    (uint32_t)picture_info_mpeg1or2->non_intra_quantizer_matrix[i]
+                );
+            }
+            fputs("}}", _vdp_cap_data.fp);
         }
-        fputs("}, {", _vdp_cap_data.fp);
-        for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_mpeg1or2->non_intra_quantizer_matrix); ++i) {
-            fprintf(
-                _vdp_cap_data.fp,
-                "%s%d",
-                (i == 0) ? "" : ", ",
-                picture_info_mpeg1or2->non_intra_quantizer_matrix[i]
-            );
-        }
-        fputs("}}", _vdp_cap_data.fp);
         break;
     case VDP_DECODER_PROFILE_H264_BASELINE:
     case VDP_DECODER_PROFILE_H264_MAIN:
     case VDP_DECODER_PROFILE_H264_HIGH:
+        {
+            VdpPictureInfoH264 const * picture_info_h264 =
+                (VdpPictureInfoH264 const *)picture_info;
+
+            fprintf(
+                _vdp_cap_data.fp,
+                "{%u, {%d, %d}, %d, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %d, %d, %d, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, {",
+                picture_info_h264->slice_count,
+                picture_info_h264->field_order_cnt[0],
+                picture_info_h264->field_order_cnt[1],
+                (int32_t)picture_info_h264->is_reference,
+                (uint32_t)picture_info_h264->frame_num,
+                (uint32_t)picture_info_h264->field_pic_flag,
+                (uint32_t)picture_info_h264->bottom_field_flag,
+                (uint32_t)picture_info_h264->num_ref_frames,
+                (uint32_t)picture_info_h264->mb_adaptive_frame_field_flag,
+                (uint32_t)picture_info_h264->constrained_intra_pred_flag,
+                (uint32_t)picture_info_h264->weighted_pred_flag,
+                (uint32_t)picture_info_h264->weighted_bipred_idc,
+                (uint32_t)picture_info_h264->frame_mbs_only_flag,
+                (uint32_t)picture_info_h264->transform_8x8_mode_flag,
+                (int32_t)picture_info_h264->chroma_qp_index_offset,
+                (int32_t)picture_info_h264->second_chroma_qp_index_offset,
+                (int32_t)picture_info_h264->pic_init_qp_minus26,
+                (uint32_t)picture_info_h264->num_ref_idx_l0_active_minus1,
+                (uint32_t)picture_info_h264->num_ref_idx_l1_active_minus1,
+                (uint32_t)picture_info_h264->log2_max_frame_num_minus4,
+                (uint32_t)picture_info_h264->pic_order_cnt_type,
+                (uint32_t)picture_info_h264->log2_max_pic_order_cnt_lsb_minus4,
+                (uint32_t)picture_info_h264->delta_pic_order_always_zero_flag,
+                (uint32_t)picture_info_h264->direct_8x8_inference_flag,
+                (uint32_t)picture_info_h264->entropy_coding_mode_flag,
+                (uint32_t)picture_info_h264->pic_order_present_flag,
+                (uint32_t)picture_info_h264->deblocking_filter_control_present_flag,
+                (uint32_t)picture_info_h264->redundant_pic_cnt_present_flag
+            );
+            for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_h264->scaling_lists_4x4); ++i) {
+                fputs((i == 0) ? "{" : "}, {", _vdp_cap_data.fp);
+                for (uint32_t j = 0; j < _VDP_TRACE_ARSIZE(picture_info_h264->scaling_lists_4x4[0]); ++j) {
+                    fprintf(
+                        _vdp_cap_data.fp,
+                        "%s%u",
+                        (j == 0) ? "" : ", ",
+                        (uint32_t)picture_info_h264->scaling_lists_4x4[i][j]
+                    );
+                }
+            }
+            fputs("}}, {", _vdp_cap_data.fp);
+            for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_h264->scaling_lists_8x8); ++i) {
+                fputs((i == 0) ? "{" : "}, {", _vdp_cap_data.fp);
+                for (uint32_t j = 0; j < _VDP_TRACE_ARSIZE(picture_info_h264->scaling_lists_8x8[0]); ++j) {
+                    fprintf(
+                        _vdp_cap_data.fp,
+                        "%s%u",
+                        (j == 0) ? "" : ", ",
+                        (uint32_t)picture_info_h264->scaling_lists_8x8[i][j]
+                    );
+                }
+            }
+            fputs("}}, {", _vdp_cap_data.fp);
+            for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_h264->referenceFrames); ++i) {
+                VdpReferenceFrameH264 const * rf = &(picture_info_h264->referenceFrames[i]);
+                fprintf(
+                    _vdp_cap_data.fp,
+                    "%s{%u, %d, %d, %d, {%d, %d}, %u}",
+                    (i == 0) ? "" : ", ",
+                    rf->surface,
+                    (int32_t)rf->is_long_term,
+                    (int32_t)rf->top_is_reference,
+                    (int32_t)rf->bottom_is_reference,
+                    (int32_t)rf->field_order_cnt[0],
+                    (int32_t)rf->field_order_cnt[1],
+                    (uint32_t)rf->frame_idx
+                );
+            }
+            fputs("}", _vdp_cap_data.fp);
+        }
+        break;
     case VDP_DECODER_PROFILE_VC1_SIMPLE:
     case VDP_DECODER_PROFILE_VC1_MAIN:
     case VDP_DECODER_PROFILE_VC1_ADVANCED:
-        // FIXME: Dump all the other types too.
-        // For now, just deliberately fall through
+        {
+            VdpPictureInfoVC1 const * picture_info_vc1 =
+                (VdpPictureInfoVC1 const *)picture_info;
+
+            fprintf(
+                _vdp_cap_data.fp,
+                "{%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u}",
+                picture_info_vc1->forward_reference,
+                picture_info_vc1->backward_reference,
+                picture_info_vc1->slice_count,
+                (uint32_t)picture_info_vc1->picture_type,
+                (uint32_t)picture_info_vc1->frame_coding_mode,
+                (uint32_t)picture_info_vc1->postprocflag,
+                (uint32_t)picture_info_vc1->pulldown,
+                (uint32_t)picture_info_vc1->interlace,
+                (uint32_t)picture_info_vc1->tfcntrflag,
+                (uint32_t)picture_info_vc1->finterpflag,
+                (uint32_t)picture_info_vc1->psf,
+                (uint32_t)picture_info_vc1->dquant,
+                (uint32_t)picture_info_vc1->panscan_flag,
+                (uint32_t)picture_info_vc1->refdist_flag,
+                (uint32_t)picture_info_vc1->quantizer,
+                (uint32_t)picture_info_vc1->extended_mv,
+                (uint32_t)picture_info_vc1->extended_dmv,
+                (uint32_t)picture_info_vc1->overlap,
+                (uint32_t)picture_info_vc1->vstransform,
+                (uint32_t)picture_info_vc1->loopfilter,
+                (uint32_t)picture_info_vc1->fastuvmc,
+                (uint32_t)picture_info_vc1->range_mapy_flag,
+                (uint32_t)picture_info_vc1->range_mapy,
+                (uint32_t)picture_info_vc1->range_mapuv_flag,
+                (uint32_t)picture_info_vc1->range_mapuv,
+                (uint32_t)picture_info_vc1->multires,
+                (uint32_t)picture_info_vc1->syncmarker,
+                (uint32_t)picture_info_vc1->rangered,
+                (uint32_t)picture_info_vc1->maxbframes,
+                (uint32_t)picture_info_vc1->deblockEnable,
+                (uint32_t)picture_info_vc1->pquant
+            );
+        }
+        break;
     default:
         fputs("{...}", _vdp_cap_data.fp);
         break;
