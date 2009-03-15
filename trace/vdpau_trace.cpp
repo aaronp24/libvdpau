@@ -400,6 +400,9 @@ static void _vdp_cap_dump_video_mixer_attribute_value(
     case VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MAX_LUMA:
         fprintf(_vdp_cap_data.fp, "%f", *(float const *)value);
         break;
+    case VDP_VIDEO_MIXER_ATTRIBUTE_SKIP_CHROMA_DEINTERLACE:
+        fprintf(_vdp_cap_data.fp, "%u", *(uint8_t const *)value);
+        break;
     default:
         fputs("???", _vdp_cap_data.fp);
         break;
