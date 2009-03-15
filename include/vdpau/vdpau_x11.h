@@ -7,7 +7,7 @@
  * This copyright notice applies to this header file:
  *
  * Copyright (c) 2008 NVIDIA Corporation
- * 
+ *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
  * files (the "Software"), to deal in the Software without
@@ -33,11 +33,11 @@
 /**
  * \file vdpau_x11.h
  * \brief X11 Window System Integration Layer
- * 
- * This file contains the \ref api_winsys_x11 "X11 Window System 
- * Integration Layer". 
- */ 
- 
+ *
+ * This file contains the \ref api_winsys_x11 "X11 Window System
+ * Integration Layer".
+ */
+
 #ifndef _VDPAU_X11_H
 #define _VDPAU_X11_H
 
@@ -49,74 +49,74 @@ extern "C" {
 #endif
 
 /**
- * \ingroup api_winsys 
- * @{ 
+ * \ingroup api_winsys
+ * @{
  */
 
 /**
  * \defgroup api_winsys_x11 X11 Window System Integration Layer
- *  
- * The set of VDPAU functionality specific to usage with the X 
+ *
+ * The set of VDPAU functionality specific to usage with the X
  * Window System.
- *  
- * \section Driver Library Layout 
- *  
- * An X11-oriented VDPAU installation consists of the following 
- * components: 
- *  
- * - Header files. These files are located in the standard 
+ *
+ * \section Driver Library Layout
+ *
+ * An X11-oriented VDPAU installation consists of the following
+ * components:
+ *
+ * - Header files. These files are located in the standard
  *   system header file path.
  *   - \c vdpau/vdpau.h
  *   - \c vdpau/vdpau_x11.h
- * - The VDPAU wrapper library. These files are located in the 
+ * - The VDPAU wrapper library. These files are located in the
  *   standard system (possibly X11-specific) library path.
  *   - \c libvdpau.so.1 (runtime)
  *   - \c libvdpau.so (development)
- * - Back-end driver files. These files are located in the 
+ * - Back-end driver files. These files are located in the
  *   standard system (possibly X11-specific) library path.
  *   - \c libvdpau_\%s.so
  *   For example:
  *   - \c libvdpau_nvidia.so
  *   - \c libvdpau_intel.so
  *   - \c libvdpau_ati.so
- *  
- * The VDPAU wrapper library implements just one function; \ref 
- * vdp_device_create_x11. The wrapper will implement this function 
- * by dynamically loading the appropriate back-end driver file 
+ *
+ * The VDPAU wrapper library implements just one function; \ref
+ * vdp_device_create_x11. The wrapper will implement this function
+ * by dynamically loading the appropriate back-end driver file
  * mentioned above. Long-term, the wrapper will use a
  * VDPAU-specific X  extension to determine which back-end driver
  * to load. Currently, the wrapper library hard-codes the driver
- * name as "nvidia", although this can be overridden using the 
+ * name as "nvidia", although this can be overridden using the
  * environment variable VDPAU_DRIVER.
  *
- * The back-end driver is expected to implement a function named 
+ * The back-end driver is expected to implement a function named
  * \b vdp_imp_device_create_x11. The wrapper will call this function to
- * actually implement the \ref vdp_device_create_x11 application call. 
- *  
- * Note that it is theoretically possible for an application to 
- * create multiple \ref VdpDevice "VdpDevice" objects. In this 
- * case, the wrapper library may load multiple back-end drivers 
- * into the same application, and/or invoke a specific back-end 
- * driver's \b VdpImpDeviceCreateX11 multiple times. The wrapper 
- * libray imposes no policy regarding whether the application 
+ * actually implement the \ref vdp_device_create_x11 application call.
+ *
+ * Note that it is theoretically possible for an application to
+ * create multiple \ref VdpDevice "VdpDevice" objects. In this
+ * case, the wrapper library may load multiple back-end drivers
+ * into the same application, and/or invoke a specific back-end
+ * driver's \b VdpImpDeviceCreateX11 multiple times. The wrapper
+ * libray imposes no policy regarding whether the application
  * may instantiate multiple \ref VdpDevice "VdpDevice" objects for
- * the same display and/or screen. However, back-end drivers are 
- * free to limit the number of \ref VdpDevice "VdpDevice" objects 
- * as required by their implementation. 
- *  
- * @{ 
+ * the same display and/or screen. However, back-end drivers are
+ * free to limit the number of \ref VdpDevice "VdpDevice" objects
+ * as required by their implementation.
+ *
+ * @{
  */
 
-/** 
- * \brief Create a VdpDevice object for use with X11. 
+/**
+ * \brief Create a VdpDevice object for use with X11.
  * \param[in] display The X Display that the VdpDevice VdpDevice
  *       will operate against.
- * \param[in] screen The X screen that the VdpDevice will operate 
+ * \param[in] screen The X screen that the VdpDevice will operate
  *       against.
- * \param[out] device The new device's handle. 
- * \param[out] get_proc_address The get_proc_address entry point 
+ * \param[out] device The new device's handle.
+ * \param[out] get_proc_address The get_proc_address entry point
  *       to use with this device.
- * \return VdpStatus The completion status of the operation. 
+ * \return VdpStatus The completion status of the operation.
  */
 typedef VdpStatus VdpDeviceCreateX11(
     Display *             display,
@@ -126,21 +126,21 @@ typedef VdpStatus VdpDeviceCreateX11(
     VdpGetProcAddress * * get_proc_address
 );
 
-/** 
- * \brief Create a VdpDevice object for use with X11. 
+/**
+ * \brief Create a VdpDevice object for use with X11.
  * This is an actual symbol of type \ref VdpDeviceCreateX11
- * 
+ *
  */
 VdpDeviceCreateX11 vdp_device_create_x11;
 
-/** 
+/**
  * \brief Create a VdpPresentationQueueTarget for use with X11.
- * \param[in] device The device that will contain the queue 
+ * \param[in] device The device that will contain the queue
  *       target.
- * \param[in] drawable The X11 Drawable that the presentation 
+ * \param[in] drawable The X11 Drawable that the presentation
  *       queue will present into.
- * \param[out] target The new queue target's handle. 
- * \return VdpStatus The completion status of the operation. 
+ * \param[out] target The new queue target's handle.
+ * \return VdpStatus The completion status of the operation.
  *
  * Note: VDPAU expects to own the entire drawable for the duration of time
  * that the presentation queue target exists. In particular,

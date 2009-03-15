@@ -7,7 +7,7 @@
  * This copyright notice applies to this header file:
  *
  * Copyright (c) 2008 NVIDIA Corporation
- * 
+ *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
  * files (the "Software"), to deal in the Software without
@@ -32,7 +32,7 @@
 
 /**
  * \mainpage Video Decode and Presentation API for Unix
- *  
+ *
  * \section intro Introduction
  *
  * The Video Decode and Presentation API for Unix (VDPAU) provides
@@ -83,7 +83,7 @@
  * A surface stores pixel information. Various types of surfaces
  * existing for different purposes:
  *
- * - \ref VdpVideoSurface "VdpVideoSurface"s store decompressed 
+ * - \ref VdpVideoSurface "VdpVideoSurface"s store decompressed
  *   YCbCr video frames in an implementation-defined internal
  *   format.
  * - \ref VdpOutputSurface "VdpOutputSurface"s store RGB 4:4:4
@@ -165,7 +165,7 @@
  *
  * VDPAU is designed so that multiple implementations can be
  * used without application changes. For example, VDPAU could be
- * hosted on X11, or via direct GPU access. 
+ * hosted on X11, or via direct GPU access.
  *
  * The key technology behind this is the use of function
  * pointers and a "get proc address" style API for all entry
@@ -189,8 +189,8 @@
  * library would handle loading the appropriate back-end, and
  * implementing a similar "get proc address" scheme internally.
  *
- * However, the above scheme does not work well in the context 
- * of separated \ref api_core and \ref api_winsys. In this 
+ * However, the above scheme does not work well in the context
+ * of separated \ref api_core and \ref api_winsys. In this
  * scenario, one would require a separate wrapper library per
  * Window System, since each Window System would have a
  * different function name and prototype for the main factory
@@ -208,67 +208,67 @@
  *
  * \section threading Multi-threading
  *
- * All VDPAU functionality is fully thread-safe; any number of 
+ * All VDPAU functionality is fully thread-safe; any number of
  * threads may call into any VDPAU functions at any time. VDPAU
  * may not be called from signal-handlers.
- *  
- * Note, however, that this simply guarantees that internal 
- * VDPAU state will not be corrupted by thread usage, and that 
+ *
+ * Note, however, that this simply guarantees that internal
+ * VDPAU state will not be corrupted by thread usage, and that
  * crashes and deadlocks will not occur. Completely arbitrary
  * thread usage may not generate the results that an application
  * desires. In particular, care must be taken when multiple
  * threads are performing operations on the same VDPAU objects.
- *  
- * VDPAU implementations guarantee correct flow of surface 
- * content through the rendering pipeline, but only when 
+ *
+ * VDPAU implementations guarantee correct flow of surface
+ * content through the rendering pipeline, but only when
  * function calls that read from or write to a surface return to
  * the caller prior to any thread calling any other function(s)
  * that read from or write to the surface. Invoking multiple
  * reads from a surface in parallel is OK.
- *  
- * Note that this restriction is placed upon VDPAU function 
- * invocations, and specifically not upon any back-end 
- * hardware's physical rendering operations. VDPAU 
- * implementations are expected to internally synchronize such 
- * hardware operations. 
- *  
- * In a single-threaded application, the above restriction comes 
- * naturally; each function call completes before it is possible 
- * to begin a new function call. 
- *  
- * In a multi-threaded application, threads may need to be 
+ *
+ * Note that this restriction is placed upon VDPAU function
+ * invocations, and specifically not upon any back-end
+ * hardware's physical rendering operations. VDPAU
+ * implementations are expected to internally synchronize such
+ * hardware operations.
+ *
+ * In a single-threaded application, the above restriction comes
+ * naturally; each function call completes before it is possible
+ * to begin a new function call.
+ *
+ * In a multi-threaded application, threads may need to be
  * synchronized. For example, consider the situation where:
- *  
- * - Thread 1 is parsing compressed video data, passing them 
+ *
+ * - Thread 1 is parsing compressed video data, passing them
  *   through a \ref VdpDecoder "VdpDecoder" object, and filling a
  *   ring-buffer of \ref VdpVideoSurface "VdpVideoSurface"s
- * - Thread 2 is consuming those \ref VdpVideoSurface 
+ * - Thread 2 is consuming those \ref VdpVideoSurface
  *   "VdpVideoSurface"s, and using a \ref VdpVideoMixer
  *   "VdpVideoMixer" to process them and composite them with UI.
- *  
- * In this case, the threads must synchronize to ensure that 
- * thread 1's call to \ref VdpDecoderRender has returned prior to 
- * thread 2's call(s) to \ref VdpVideoMixerRender that use that 
- * specific surface. This could be achieved using the following 
- * pseudo-code: 
- * 
+ *
+ * In this case, the threads must synchronize to ensure that
+ * thread 1's call to \ref VdpDecoderRender has returned prior to
+ * thread 2's call(s) to \ref VdpVideoMixerRender that use that
+ * specific surface. This could be achieved using the following
+ * pseudo-code:
+ *
  * \code
- * Queue<VdpVideoSurface> q_full_surfaces; 
- * Queue<VdpVideoSurface> q_empty_surfaces; 
- *  
- * thread_1() { 
+ * Queue<VdpVideoSurface> q_full_surfaces;
+ * Queue<VdpVideoSurface> q_empty_surfaces;
+ *
+ * thread_1() {
  *     for (;;) {
  *         VdpVideoSurface s = q_empty_surfaces.get();
  *         // Parse compressed stream here
  *         VdpDecoderRender(s, ...);
  *         q_full_surfaces.put(s);
  *     }
- * } 
- *  
+ * }
+ *
  * // This would need to be more complex if
  * // VdpVideoMixerRender were to be provided with more
  * // than one field/frame at a time.
- * thread_1() { 
+ * thread_1() {
  *     for (;;) {
  *         // Possibly, other rendering operations to mixer
  *         // layer surfaces here.
@@ -282,26 +282,26 @@
  *     }
  * }
  * \endcode
- * 
+ *
  * Finally, note that VDPAU makes no guarantees regarding any
  * level of parallelism in any given implementation. Put another
  * way, use of multi-threading is not guaranteed to yield any
  * performance gain, and in theory could even slightly reduce
  * performance due to threading/synchronization overhead.
- *  
+ *
  * However, the intent of the threading requirements is to allow
- * for e.g. video decoding and video mixer operations to proceed 
- * in parallel in hardware. Given a (presumably multi-threaded) 
- * application that kept each portion of the hardware busy, this 
- * would yield a performance increase. 
- * 
+ * for e.g. video decoding and video mixer operations to proceed
+ * in parallel in hardware. Given a (presumably multi-threaded)
+ * application that kept each portion of the hardware busy, this
+ * would yield a performance increase.
+ *
  * \section endianness Surface Endianness
  *
- * When dealing with surface content, i.e. the input/output of 
- * Put/GetBits functions, applications must take care to access 
- * memory in the correct fashion, so as to avoid endianness 
- * issues. 
- *  
+ * When dealing with surface content, i.e. the input/output of
+ * Put/GetBits functions, applications must take care to access
+ * memory in the correct fashion, so as to avoid endianness
+ * issues.
+ *
  * By established convention in the 3D graphics world, RGBA data
  * is defined to be an array of 32-bit pixels containing packed
  * RGBA components, not as an array of bytes or interleaved RGBA
@@ -311,35 +311,35 @@
  * as interleaved arrays of 8-bit components (i.e. using an
  * 8-bit pointer.) Deviation from this convention will lead to
  * endianness issues, unless appropriate care is taken.
- * 
+ *
  * The same convention is followed for some packed YCbCr formats
  * such as \ref VDP_YCBCR_FORMAT_Y8U8V8A8; i.e. they are
  * considered arrays of 32-bit pixels, and hence should be
  * accessed as such.
- * 
+ *
  * For YCbCr formats with chroma decimation and/or planar
- * formats, however, this convention is awkward. Therefore, 
+ * formats, however, this convention is awkward. Therefore,
  * formats such as \ref VDP_YCBCR_FORMAT_NV12 are defined as
  * arrays of (potentially interleaved) byte-sized components.
  * Hence, applications should manipulate such data 8-bits at a
  * time, using 8-bit pointers.
- * 
+ *
  * Note that one common usage for the input/output of
  * Put/GetBits APIs is file I/O. Typical file I/O APIs treat all
  * memory as a simple array of 8-bit values. This violates the
  * rule requiring surface data to be accessed in its true native
  * format. As such, applications may be required to solve
  * endianness issues. Possible solutions include:
- * 
+ *
  * - Authoring static UI data files according to the endianness
  *   of the target execution platform.
  * - Conditionally byte-swapping Put/GetBits data buffers at
  *   run-time based on execution platform.
- *  
- * Note: Complete details regarding each surface format's 
- * precise pixel layout is included with the documentation of 
- * each surface type. For example, see \ref 
- * VDP_RGBA_FORMAT_B8G8R8A8. 
+ *
+ * Note: Complete details regarding each surface format's
+ * precise pixel layout is included with the documentation of
+ * each surface type. For example, see \ref
+ * VDP_RGBA_FORMAT_B8G8R8A8.
  *
  * \section video_decoder_usage Video Decoder Usage
  *
@@ -389,7 +389,7 @@
  * - The slice start code prefix may be included in a separate bitstream
  *   buffer array entry to the actual slice data extracted from the bitstream.
  * - Multiple bitstream buffer array entries (e.g. one per slice) may point at
- *   the same physical data storage for the slice start code prefix. 
+ *   the same physical data storage for the slice start code prefix.
  *
  * \subsection VC-1 Simple and Main Profile
  *
@@ -428,13 +428,13 @@
  * from the bitstream.
  *
  * \section video_mixer_usage Video Mixer Usage
- *  
- * \subsection video_surface_content VdpVideoSurface Content 
- *  
+ *
+ * \subsection video_surface_content VdpVideoSurface Content
+ *
  * Each \ref VdpVideoSurface "VdpVideoSurface" is expected to contain an
  * entire frame's-worth of data, irrespective of whether an interlaced of
- * progressive sequence is being decoded. 
- *  
+ * progressive sequence is being decoded.
+ *
  * Depending on the exact encoding structure of the compressed video stream,
  * the application may need to call \ref VdpDecoderRender twice to fill a
  * single \ref VdpVideoSurface "VdpVideoSurface". When the stream contains an
@@ -442,12 +442,12 @@
  * single \ref VdpDecoderRender call will fill the entire surface. When the
  * stream contains separately encoded interlaced fields, two
  * \ref VdpDecoderRender calls will be required; one for the top field, and
- * one for the bottom field. 
- *  
+ * one for the bottom field.
+ *
  * Implementation note: When \ref VdpDecoderRender renders an interlaced
  * field, this operation must not disturb the content of the other field in
- * the surface. 
- *  
+ * the surface.
+ *
  * \subsection vm_surf_list VdpVideoMixer Surface List
  *
  * An video stream is logically composed of a sequence of fields. An
@@ -469,7 +469,7 @@
  * determining the minimum required number of surfaces for optimal operation,
  * and the maximum number of useful surfaces, beyond which surfaces are not
  * used. It is recommended that in all cases other than plain bob/weave, at
- * least 2 past and 1 future frame be provided. 
+ * least 2 past and 1 future frame be provided.
  *
  * Note that it is entirely possible, in general, for any of the
  * \ref VdpVideoMixer "VdpVideoMixer" post-processing steps other than
@@ -508,7 +508,7 @@
  * </pre>
  *
  * then:
- * 
+ *
  * <pre>
  * current_picture_structure: VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD
  * past:    [b4, t4, b3]
@@ -575,7 +575,7 @@
  * Bob de-interlacing is the default when no advanced method is requested and
  * enabled. Advanced de-interlacing algorithms may fall back to bob e.g. when
  * required past/future fields are missing.
- * 
+ *
  * All implementations must support bob de-interlacing.
  *
  * \subsection deint_adv Advanced De-interlacing
@@ -678,27 +678,27 @@
  * in the descriptions above applies to the field stream after application of
  * flags.
  *
- * \section extending Extending the API 
- * 
+ * \section extending Extending the API
+ *
  * \subsection extend_enums Enumerations and Other Constants
- * 
+ *
  * VDPAU defines a number of enumeration types.
- * 
+ *
  * When modifying VDPAU, existing enumeration constants must
  * continue to exist (although they may be deprecated), and do
  * so in the existing order.
- * 
- * The above discussion naturally applies to "manually" defined 
- * enumerations, using pre-processor macros, too. 
- *  
+ *
+ * The above discussion naturally applies to "manually" defined
+ * enumerations, using pre-processor macros, too.
+ *
  * \subsection extend_structs Structures
- * 
+ *
  * In most case, VDPAU includes no provision for modifying existing
  * structure definitions, although they may be deprecated.
- * 
+ *
  * New structures may be created, together with new API entry
- * points or feature/attribute/parameter values, to expose new 
- * functionality. 
+ * points or feature/attribute/parameter values, to expose new
+ * functionality.
  *
  * A few structures are considered plausible candidates for future extension.
  * Such structures include a version number as the first field, indicating the
@@ -706,21 +706,21 @@
  * modified by adding new fields to the end of the structure, so that the
  * original structure definition is completely compatible with a leading
  * subset of fields of the extended structure.
- * 
+ *
  * \subsection extend_functions Functions
- * 
+ *
  * Existing functions may not be modified, although they may be
  * deprecated.
- * 
+ *
  * New functions may be added at will. Note the enumeration
  * requirements when modifying the enumeration that defines the
  * list of entry points.
- * 
- * \section preemption_note Display Preemption 
- *  
- * Please note that the display may be preempted away from 
- * VDPAU at any time. See \ref display_preemption for more 
- * details. 
+ *
+ * \section preemption_note Display Preemption
+ *
+ * Please note that the display may be preempted away from
+ * VDPAU at any time. See \ref display_preemption for more
+ * details.
  *
  * \subsection trademarks Trademarks
  *
@@ -756,7 +756,7 @@ extern "C" {
 
 /**
  * \defgroup base_types Basic Types
- *  
+ *
  * VDPAU primarily uses ISO C99 types from \c stdint.h.
  *
  * @{
@@ -766,8 +766,8 @@ extern "C" {
 #define VDP_TRUE 1
 /** \brief A false \ref VdpBool value */
 #define VDP_FALSE 0
-/** 
- * \brief A boolean value, holding \ref VDP_TRUE or \ref 
+/**
+ * \brief A boolean value, holding \ref VDP_TRUE or \ref
  * VDP_FALSE.
  */
 typedef int VdpBool;
@@ -781,14 +781,14 @@ typedef int VdpBool;
  */
 
 /**
- * \brief An invalid object handle value. 
- *  
- * This value may be used to represent an invalid, or 
- * non-existent, object (\ref VdpDevice "VdpDevice", 
- * \ref VdpVideoSurface "VdpVideoSurface", etc.) 
- *  
- * Note that most APIs require valid object handles in all 
- * cases, and will fail when presented with this value. 
+ * \brief An invalid object handle value.
+ *
+ * This value may be used to represent an invalid, or
+ * non-existent, object (\ref VdpDevice "VdpDevice",
+ * \ref VdpVideoSurface "VdpVideoSurface", etc.)
+ *
+ * Note that most APIs require valid object handles in all
+ * cases, and will fail when presented with this value.
  */
 #define VDP_INVALID_HANDLE 0xffffffffU
 
@@ -810,85 +810,85 @@ typedef uint32_t VdpChromaType;
  */
 typedef uint32_t VdpYCbCrFormat;
 
-/** 
- * \hideinitializer 
- * \brief The "NV12" YCbCr surface format. 
- *  
- * This format has a two planes, a Y plane and a UV plane. 
- *  
- * The Y plane is an array of byte-sized Y components. 
- * Applications should access this data via a uint8_t pointer. 
- *  
- * The UV plane is an array of interleaved byte-sized U and V 
- * components, in the order U, V, U, V. Applications should 
- * access this data via a uint8_t pointer. 
- */ 
+/**
+ * \hideinitializer
+ * \brief The "NV12" YCbCr surface format.
+ *
+ * This format has a two planes, a Y plane and a UV plane.
+ *
+ * The Y plane is an array of byte-sized Y components.
+ * Applications should access this data via a uint8_t pointer.
+ *
+ * The UV plane is an array of interleaved byte-sized U and V
+ * components, in the order U, V, U, V. Applications should
+ * access this data via a uint8_t pointer.
+ */
 #define VDP_YCBCR_FORMAT_NV12     (VdpYCbCrFormat)0
-/** 
- * \hideinitializer 
- * \brief The "YV12" YCbCr surface format. 
- *  
+/**
+ * \hideinitializer
+ * \brief The "YV12" YCbCr surface format.
+ *
  * This format has a three planes, a Y plane, a U plane, and a V
- * plane. 
- *  
- * Each of the planes is an array of byte-sized components. 
- *  
- * Applications should access this data via a uint8_t pointer. 
- */ 
+ * plane.
+ *
+ * Each of the planes is an array of byte-sized components.
+ *
+ * Applications should access this data via a uint8_t pointer.
+ */
 #define VDP_YCBCR_FORMAT_YV12     (VdpYCbCrFormat)1
-/** 
- * \hideinitializer 
- * \brief The "UYVY" YCbCr surface format. 
- *  
- * This format may also be known as Y422, UYNV, HDYC. 
- *  
- * This format has a single plane. 
- *  
- * This plane is an array of interleaved byte-sized Y, U, and V 
- * components, in the order U, Y, V, Y, U, Y, V, Y. 
- *  
+/**
+ * \hideinitializer
+ * \brief The "UYVY" YCbCr surface format.
+ *
+ * This format may also be known as Y422, UYNV, HDYC.
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array of interleaved byte-sized Y, U, and V
+ * components, in the order U, Y, V, Y, U, Y, V, Y.
+ *
  * Applications should access this data via a uint8_t pointer.
- */ 
+ */
 #define VDP_YCBCR_FORMAT_UYVY     (VdpYCbCrFormat)2
-/** 
- * \hideinitializer 
- * \brief The "YUYV" YCbCr surface format. 
- *  
+/**
+ * \hideinitializer
+ * \brief The "YUYV" YCbCr surface format.
+ *
  * This format may also be known as YUY2, YUNV, V422.
- *  
- * This format has a single plane. 
- *  
- * This plane is an array of interleaved byte-sized Y, U, and V 
- * components, in the order Y, U, Y, V, Y, U, Y, V. 
- *  
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array of interleaved byte-sized Y, U, and V
+ * components, in the order Y, U, Y, V, Y, U, Y, V.
+ *
  * Applications should access this data via a uint8_t pointer.
- */ 
+ */
 #define VDP_YCBCR_FORMAT_YUYV     (VdpYCbCrFormat)3
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief A packed YCbCr format.
- *  
- * This format has a single plane. 
- *  
- * This plane is an array packed 32-bit pixel data. Within each 
- * 32-bit pixel, bits [31:24] contain A, bits [23:16] contain V, 
- * bits [15:8] contain U, and bits [7:0] contain Y. 
- *  
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array packed 32-bit pixel data. Within each
+ * 32-bit pixel, bits [31:24] contain A, bits [23:16] contain V,
+ * bits [15:8] contain U, and bits [7:0] contain Y.
+ *
  * Applications should access this data via a uint32_t pointer.
- */ 
+ */
 #define VDP_YCBCR_FORMAT_Y8U8V8A8 (VdpYCbCrFormat)4
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief A packed YCbCr format.
- *  
- * This format has a single plane. 
- *  
- * This plane is an array packed 32-bit pixel data. Within each 
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array packed 32-bit pixel data. Within each
  * 32-bit pixel, bits [31:24] contain A, bits [23:16] contain Y,
- * bits [15:8] contain U, and bits [7:0] contain V. 
- *  
+ * bits [15:8] contain U, and bits [7:0] contain V.
+ *
  * Applications should access this data via a uint32_t pointer.
- */ 
+ */
 #define VDP_YCBCR_FORMAT_V8U8Y8A8 (VdpYCbCrFormat)5
 
 /**
@@ -896,68 +896,68 @@ typedef uint32_t VdpYCbCrFormat;
  */
 typedef uint32_t VdpRGBAFormat;
 
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief A packed RGB format.
- *  
- * This format has a single plane. 
- *  
- * This plane is an array packed 32-bit pixel data. Within each 
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array packed 32-bit pixel data. Within each
  * 32-bit pixel, bits [31:24] contain A, bits [23:16] contain R,
- * bits [15:8] contain G, and bits [7:0] contain B. 
- *  
+ * bits [15:8] contain G, and bits [7:0] contain B.
+ *
  * Applications should access this data via a uint32_t pointer.
- */ 
+ */
 #define VDP_RGBA_FORMAT_B8G8R8A8    (VdpRGBAFormat)0
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief A packed RGB format.
- *  
- * This format has a single plane. 
- *  
- * This plane is an array packed 32-bit pixel data. Within each 
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array packed 32-bit pixel data. Within each
  * 32-bit pixel, bits [31:24] contain A, bits [23:16] contain B,
- * bits [15:8] contain G, and bits [7:0] contain R. 
- *  
+ * bits [15:8] contain G, and bits [7:0] contain R.
+ *
  * Applications should access this data via a uint32_t pointer.
- */ 
+ */
 #define VDP_RGBA_FORMAT_R8G8B8A8    (VdpRGBAFormat)1
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief A packed RGB format.
- *  
- * This format has a single plane. 
- *  
- * This plane is an array packed 32-bit pixel data. Within each 
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array packed 32-bit pixel data. Within each
  * 32-bit pixel, bits [31:30] contain A, bits [29:20] contain B,
- * bits [19:10] contain G, and bits [9:0] contain R. 
- *  
- * Applications should access this data via a uint32_t pointer. 
- */ 
+ * bits [19:10] contain G, and bits [9:0] contain R.
+ *
+ * Applications should access this data via a uint32_t pointer.
+ */
 #define VDP_RGBA_FORMAT_R10G10B10A2 (VdpRGBAFormat)2
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief A packed RGB format.
- *  
- * This format has a single plane. 
- *  
- * This plane is an array packed 32-bit pixel data. Within each 
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array packed 32-bit pixel data. Within each
  * 32-bit pixel, bits [31:30] contain A, bits [29:20] contain R,
- * bits [19:10] contain G, and bits [9:0] contain B. 
- *  
- * Applications should access this data via a uint32_t pointer. 
- */ 
+ * bits [19:10] contain G, and bits [9:0] contain B.
+ *
+ * Applications should access this data via a uint32_t pointer.
+ */
 #define VDP_RGBA_FORMAT_B10G10R10A2 (VdpRGBAFormat)3
-/** 
- * \hideinitializer 
- * \brief An alpha-only surface format. 
- *  
- * This format has a single plane. 
- *  
+/**
+ * \hideinitializer
+ * \brief An alpha-only surface format.
+ *
+ * This format has a single plane.
+ *
  * This plane is an array of byte-sized components.
- *  
- * Applications should access this data via a uint8_t pointer. 
- */ 
+ *
+ * Applications should access this data via a uint8_t pointer.
+ */
 #define VDP_RGBA_FORMAT_A8          (VdpRGBAFormat)4
 
 /**
@@ -965,53 +965,53 @@ typedef uint32_t VdpRGBAFormat;
  */
 typedef uint32_t VdpIndexedFormat;
 
-/** 
- * \hideinitializer 
- * \brief A 4-bit indexed format, with alpha. 
- *  
- * This format has a single plane. 
- *  
- * This plane is an array of byte-sized components. Within each 
+/**
+ * \hideinitializer
+ * \brief A 4-bit indexed format, with alpha.
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array of byte-sized components. Within each
  * byte, bits [7:4] contain I (index), and bits [3:0] contain A.
- *  
- * Applications should access this data via a uint8_t pointer. 
- */ 
+ *
+ * Applications should access this data via a uint8_t pointer.
+ */
 #define VDP_INDEXED_FORMAT_A4I4 (VdpIndexedFormat)0
-/** 
- * \hideinitializer 
- * \brief A 4-bit indexed format, with alpha. 
- *  
- * This format has a single plane. 
- *  
- * This plane is an array of byte-sized components. Within each 
- * byte, bits [7:4] contain A, and bits [3:0] contain I (index). 
- *  
- * Applications should access this data via a uint8_t pointer. 
- */ 
+/**
+ * \hideinitializer
+ * \brief A 4-bit indexed format, with alpha.
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array of byte-sized components. Within each
+ * byte, bits [7:4] contain A, and bits [3:0] contain I (index).
+ *
+ * Applications should access this data via a uint8_t pointer.
+ */
 #define VDP_INDEXED_FORMAT_I4A4 (VdpIndexedFormat)1
-/** 
- * \hideinitializer 
- * \brief A 8-bit indexed format, with alpha. 
- *  
- * This format has a single plane. 
- *  
- * This plane is an array of interleaved byte-sized A and I 
- * (index) components, in the order A, I, A, I. 
- *  
+/**
+ * \hideinitializer
+ * \brief A 8-bit indexed format, with alpha.
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array of interleaved byte-sized A and I
+ * (index) components, in the order A, I, A, I.
+ *
  * Applications should access this data via a uint8_t pointer.
- */ 
+ */
 #define VDP_INDEXED_FORMAT_A8I8 (VdpIndexedFormat)2
-/** 
- * \hideinitializer 
- * \brief A 8-bit indexed format, with alpha. 
- *  
- * This format has a single plane. 
- *  
- * This plane is an array of interleaved byte-sized A and I 
- * (index) components, in the order I, A, I, A. 
- *  
+/**
+ * \hideinitializer
+ * \brief A 8-bit indexed format, with alpha.
+ *
+ * This format has a single plane.
+ *
+ * This plane is an array of interleaved byte-sized A and I
+ * (index) components, in the order I, A, I, A.
+ *
  * Applications should access this data via a uint8_t pointer.
- */ 
+ */
 #define VDP_INDEXED_FORMAT_I8A8 (VdpIndexedFormat)3
 
 /**
@@ -1073,7 +1073,7 @@ typedef struct {
  */
 
 /**
- * \hideinitializer 
+ * \hideinitializer
  * \brief The set of all possible error codes.
  */
 typedef enum {
@@ -1083,10 +1083,10 @@ typedef enum {
      * No backend implementation could be loaded.
      */
     VDP_STATUS_NO_IMPLEMENTATION,
-    /** 
+    /**
      * The display was preempted, or a fatal error occurred.
      *
-     * The application must re-initialize VDPAU. 
+     * The application must re-initialize VDPAU.
      */
     VDP_STATUS_DISPLAY_PREEMPTED,
     /**
@@ -1213,7 +1213,7 @@ typedef enum {
 /**
  * \brief Retrieve a string describing an error code.
  * \param[in] status The error code.
- * \return A pointer to the string. Note that this is a 
+ * \return A pointer to the string. Note that this is a
  *       statically allocated read-only string. As such, the
  *       application must not free the returned pointer. The
  *       pointer is valid as long as the VDPAU implementation is
@@ -1225,24 +1225,24 @@ typedef char const * VdpGetErrorString(
 
 /*@}*/
 
-/** 
- * \defgroup versioning Versioning 
- *  
- *  
- * @{ 
- */ 
+/**
+ * \defgroup versioning Versioning
+ *
+ *
+ * @{
+ */
 
-/** 
- * \brief The VDPAU version described by this header file. 
- *  
- * Note that VDPAU version numbers are simple integers that 
- * increase monotonically (typically by value 1) with each VDPAU 
- * header revision. 
+/**
+ * \brief The VDPAU version described by this header file.
+ *
+ * Note that VDPAU version numbers are simple integers that
+ * increase monotonically (typically by value 1) with each VDPAU
+ * header revision.
  */
 #define VDPAU_VERSION 0
 
 /**
- * \brief Retrieve the VDPAU version implemented by the backend. 
+ * \brief Retrieve the VDPAU version implemented by the backend.
  * \param[out] api_version The API version.
  * \return VdpStatus The completion status of the operation.
  */
@@ -1252,7 +1252,7 @@ typedef VdpStatus VdpGetApiVersion(
 );
 
 /**
- * \brief Retrieve an implementation-specific string description 
+ * \brief Retrieve an implementation-specific string description
  *        of the implementation. This typically includes detailed version
  *        information.
  * \param[out] information_string A pointer to the information
@@ -1261,12 +1261,12 @@ typedef VdpStatus VdpGetApiVersion(
  *       free the returned pointer. The pointer is valid as long
  *       as the implementation is present within the
  *       application's address space.
- * \return VdpStatus The completion status of the operation. 
- *  
- * Note that the returned string is useful for information 
- * reporting. It is not intended that the application should 
- * parse this string in order to determine any information about 
- * the implementation. 
+ * \return VdpStatus The completion status of the operation.
+ *
+ * Note that the returned string is useful for information
+ * reporting. It is not intended that the application should
+ * parse this string in order to determine any information about
+ * the implementation.
  */
 typedef VdpStatus VdpGetInformationString(
     /* output parameters follow */
@@ -1309,8 +1309,8 @@ typedef VdpStatus VdpDeviceDestroy(
  * \defgroup VdpCSCMatrix VdpCSCMatrix; CSC Matrix Manipulation
  *
  * When converting from YCbCr to RGB data formats, a color space
- * conversion operation must be performed. This operation is 
- * parameterized using a "color space conversion matrix". The 
+ * conversion operation must be performed. This operation is
+ * parameterized using a "color space conversion matrix". The
  * VdpCSCMatrix is a data structure representing this
  * information.
  *
@@ -1370,7 +1370,7 @@ typedef struct {
     float contrast;
     /**
      * Saturation adjustment amount. A value clamped between 0.0 and
-     * 10.0. 1.0 represents no modification. 
+     * 10.0. 1.0 represents no modification.
      */
     float saturation;
     /**
@@ -1416,7 +1416,7 @@ typedef VdpStatus VdpGenerateCSCMatrix(
  * \defgroup VdpVideoSurface VdpVideoSurface; Video Surface object
  *
  * A VdpVideoSurface stores YCbCr data in an internal format,
- * with a variety of possible chroma sub-sampling options. 
+ * with a variety of possible chroma sub-sampling options.
  *
  * A VdpVideoSurface may be filled with:
  * - Data provided by the CPU via \ref
@@ -1495,12 +1495,12 @@ typedef uint32_t VdpVideoSurface;
  * \param[in] width The width of the new surface.
  * \param[in] height The height of the new surface.
  * \param[out] surface The new surface's handle.
- * \return VdpStatus The completion status of the operation. 
- *  
+ * \return VdpStatus The completion status of the operation.
+ *
  * The memory backing the surface may not be initialized during
- * creation. Applications are expected to initialize any region 
- * that they use, via \ref VdpDecoderRender or \ref 
- * VdpVideoSurfacePutBitsYCbCr. 
+ * creation. Applications are expected to initialize any region
+ * that they use, via \ref VdpDecoderRender or \ref
+ * VdpVideoSurfacePutBitsYCbCr.
  */
 typedef VdpStatus VdpVideoSurfaceCreate(
     VdpDevice         device,
@@ -1593,7 +1593,7 @@ typedef VdpStatus VdpVideoSurfacePutBitsYCbCr(
  * \defgroup VdpOutputSurface VdpOutputSurface; Output Surface \
  * object
  *
- * A VdpOutputSurface stores RGBA data in a defined format. 
+ * A VdpOutputSurface stores RGBA data in a defined format.
  *
  * A VdpOutputSurface may be filled with:
  * - Data provided by the CPU via the various
@@ -1619,22 +1619,22 @@ typedef VdpStatus VdpVideoSurfacePutBitsYCbCr(
  */
 
 /**
- * \brief The set of all known color table formats, for use with 
+ * \brief The set of all known color table formats, for use with
  * \ref VdpOutputSurfacePutBitsIndexed.
  */
 typedef uint32_t VdpColorTableFormat;
 
-/** 
- * \hideinitializer 
- * \brief 8-bit per component packed into 32-bits 
- *  
- * This format is an array of packed 32-bit RGB color values. 
- * Bits [31:24] are unused, bits [23:16] contain R, bits [15:8] 
- * contain G, and bits [7:0] contain B. Note: The format is 
- * physically an array of uint32_t values, and should be accessed 
- * as such by the application in order to avoid endianness 
- * issues. 
- */ 
+/**
+ * \hideinitializer
+ * \brief 8-bit per component packed into 32-bits
+ *
+ * This format is an array of packed 32-bit RGB color values.
+ * Bits [31:24] are unused, bits [23:16] contain R, bits [15:8]
+ * contain G, and bits [7:0] contain B. Note: The format is
+ * physically an array of uint32_t values, and should be accessed
+ * as such by the application in order to avoid endianness
+ * issues.
+ */
 #define VDP_COLOR_TABLE_FORMAT_B8G8R8X8 (VdpColorTableFormat)0
 
 /**
@@ -1685,7 +1685,7 @@ typedef VdpStatus VdpOutputSurfaceQueryGetPutBitsNativeCapabilities(
  *       which information is requested.
  * \param[in] bits_indexed_format The format of the application
  *       data buffer.
- * \param[in] color_table_format The format of the color lookup 
+ * \param[in] color_table_format The format of the color lookup
  *       table.
  * \param[out] is_supported Is this surface format supported?
  * \return VdpStatus The completion status of the operation.
@@ -1732,8 +1732,8 @@ typedef uint32_t VdpOutputSurface;
  * \param[in] width The width of the new surface.
  * \param[in] height The height of the new surface.
  * \param[out] surface The new surface's handle.
- * \return VdpStatus The completion status of the operation. 
- *  
+ * \return VdpStatus The completion status of the operation.
+ *
  * The memory backing the surface will be initialized to 0 color
  * and 0 alpha (i.e. black.)
  */
@@ -1843,10 +1843,10 @@ typedef VdpStatus VdpOutputSurfacePutBitsNative(
  * \param[in] destination_rect The sub-rectangle of the surface
  *       to fill with application data. If NULL, the entire
  *       surface will be updated.
- * \param[in] color_table_format The format of the color_table. 
+ * \param[in] color_table_format The format of the color_table.
  * \param[in] color_table A table that maps between source index
  *       and target color data. See \ref VdpColorTableFormat for
- *       details regarding the memory layout. 
+ *       details regarding the memory layout.
  * \return VdpStatus The completion status of the operation.
  */
 typedef VdpStatus VdpOutputSurfacePutBitsIndexed(
@@ -1970,10 +1970,10 @@ typedef uint32_t VdpBitmapSurface;
  *       Implementations may use this as a hint to determine how
  *       to allocate the underlying storage for the surface.
  * \param[out] surface The new surface's handle.
- * \return VdpStatus The completion status of the operation. 
- *  
- * The memory backing the surface may not be initialized 
- * during creation. Applications are expected initialize any 
+ * \return VdpStatus The completion status of the operation.
+ *
+ * The memory backing the surface may not be initialized
+ * during creation. Applications are expected initialize any
  * region that they use, via \ref VdpBitmapSurfacePutBitsNative.
  */
 typedef VdpStatus VdpBitmapSurfaceCreate(
@@ -2054,10 +2054,10 @@ typedef VdpStatus VdpBitmapSurfacePutBitsNative(
  * @{
  */
 
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief The blending equation factors.
- */ 
+ */
 typedef enum {
     VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ZERO                     = 0,
     VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE                      = 1,
@@ -2076,10 +2076,10 @@ typedef enum {
     VDP_OUTPUT_SURFACE_RENDER_BLEND_FACTOR_ONE_MINUS_CONSTANT_ALPHA = 14,
 } VdpOutputSurfaceRenderBlendFactor;
 
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief The blending equations.
- */ 
+ */
 typedef enum {
     VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_SUBTRACT         = 0,
     VDP_OUTPUT_SURFACE_RENDER_BLEND_EQUATION_REVERSE_SUBTRACT = 1,
@@ -2107,35 +2107,35 @@ typedef struct {
     VdpColor                            blend_constant;
 } VdpOutputSurfaceRenderBlendState;
 
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief Do not rotate source_surface prior to compositing.
  */
 #define VDP_OUTPUT_SURFACE_RENDER_ROTATE_0   0
 
 /**
- * \hideinitializer 
+ * \hideinitializer
  * \brief Rotate source_surface 90 degrees clockwise prior to
  *        compositing.
  */
 #define VDP_OUTPUT_SURFACE_RENDER_ROTATE_90  1
 
 /**
- * \hideinitializer 
+ * \hideinitializer
  * \brief Rotate source_surface 180 degrees prior to
  *        compositing.
  */
 #define VDP_OUTPUT_SURFACE_RENDER_ROTATE_180 2
 
 /**
- * \hideinitializer 
+ * \hideinitializer
  * \brief Rotate source_surface 270 degrees clockwise prior to
  *        compositing.
  */
 #define VDP_OUTPUT_SURFACE_RENDER_ROTATE_270 3
 
 /**
- * \hideinitializer 
+ * \hideinitializer
  * \brief A separate color is used for each vertex of the
  *        smooth-shaded quad. Hence, colors array contains 4
  *        elements rather than 1. See description of colors
@@ -2534,14 +2534,14 @@ typedef struct {
 } VdpBitstreamBuffer;
 
 /**
- * \brief A generic "picture information" pointer type. 
- *  
- * This type serves solely to document the expected usage of a 
- * generic (void *) function parameter. In actual usage, the 
- * application is expected to physically provide a pointer to an 
- * instance of one of the "real" VdpPictureInfo* structures, 
- * picking the type appropriate for the decoder object in 
- * question. 
+ * \brief A generic "picture information" pointer type.
+ *
+ * This type serves solely to document the expected usage of a
+ * generic (void *) function parameter. In actual usage, the
+ * application is expected to physically provide a pointer to an
+ * instance of one of the "real" VdpPictureInfo* structures,
+ * picking the type appropriate for the decoder object in
+ * question.
  */
 typedef void * VdpPictureInfo;
 
@@ -2854,7 +2854,7 @@ typedef VdpStatus VdpDecoderRender(
 /**
  * \defgroup VdpVideoMixer VdpVideoMixer; Video Post-processing \
  *           and Compositing object
- *  
+ *
  * VdpVideoMixer can perform some subset of the following
  * post-processing steps on video:
  * - De-interlacing
@@ -2869,9 +2869,9 @@ typedef VdpStatus VdpDecoderRender(
  * processing steps on it (potentially using information from
  * past or future video surfaces). It scales the video and
  * converts it to RGB, then optionally composites it with
- * multiple auxiliary \ref VdpOutputSurface "VdpOutputSurface"s 
- * before writing the result to the destination \ref 
- * VdpOutputSurface "VdpOutputSurface". 
+ * multiple auxiliary \ref VdpOutputSurface "VdpOutputSurface"s
+ * before writing the result to the destination \ref
+ * VdpOutputSurface "VdpOutputSurface".
  *
  * The video mixer compositing model is as follows:
  *
@@ -2882,7 +2882,7 @@ typedef VdpStatus VdpDecoderRender(
  *
  * - The first layer is the background color. The background
  *   color will fill the entire rectangle.
- *  
+ *
  * - The second layer is the processed video which has been
  *   converted to RGB. These pixels will overwrite the
  *   background color of the first layer except where the second
@@ -2892,7 +2892,7 @@ typedef VdpStatus VdpDecoderRender(
  *   output rectangle is outside of the output rectangle, those
  *   portions will be clipped.
  *
- * - The third layer contains some number of auxiliary layers 
+ * - The third layer contains some number of auxiliary layers
  *   (in the form of \ref VdpOutputSurface "VdpOutputSurface"s)
  *   which will be composited using the alpha value from the
  *   those surfaces. The compositing operations are equivalent
@@ -2905,28 +2905,28 @@ typedef VdpStatus VdpDecoderRender(
  */
 
 /**
- * \brief A VdpVideoMixer feature that must be requested at 
+ * \brief A VdpVideoMixer feature that must be requested at
  *        creation time to be used.
- *  
- * Certain advanced VdpVideoMixer features are optional, and the 
- * ability to use those features at all must be requested when 
- * the VdpVideoMixer object is created. Each feature is named via 
+ *
+ * Certain advanced VdpVideoMixer features are optional, and the
+ * ability to use those features at all must be requested when
+ * the VdpVideoMixer object is created. Each feature is named via
  * a specific VdpVideoMixerFeature value.
- *  
- * Once requested, these features are permanently available 
- * within that specific VdpVideoMixer object. All features that 
- * are not explicitly requested at creation time default to 
- * being permanently unavailable. 
- *  
- * Even when requested, all features default to being initially 
- * disabled. However, applications can subsequently enable and 
- * disable features at any time. See \ref 
- * VdpVideoMixerSetFeatureEnables. 
- *  
- * Some features allow configuration of their operation. Each 
- * configurable item is an \ref VdpVideoMixerAttribute. These 
- * attributes may be manipulated at any time using \ref 
- * VdpVideoMixerSetAttributeValues. 
+ *
+ * Once requested, these features are permanently available
+ * within that specific VdpVideoMixer object. All features that
+ * are not explicitly requested at creation time default to
+ * being permanently unavailable.
+ *
+ * Even when requested, all features default to being initially
+ * disabled. However, applications can subsequently enable and
+ * disable features at any time. See \ref
+ * VdpVideoMixerSetFeatureEnables.
+ *
+ * Some features allow configuration of their operation. Each
+ * configurable item is an \ref VdpVideoMixerAttribute. These
+ * attributes may be manipulated at any time using \ref
+ * VdpVideoMixerSetAttributeValues.
  */
 typedef uint32_t VdpVideoMixerFeature;
 
@@ -2934,25 +2934,25 @@ typedef uint32_t VdpVideoMixerFeature;
  * \hideinitializer
  * \brief A VdpVideoMixerFeature.
  *
- * When requested and enabled, motion adaptive temporal 
- * deinterlacing will be used on interlaced content. 
- *  
- * When multiple de-interlacing options are requested and 
- * enabled, the back-end implementation chooses the best 
- * algorithm to apply. 
+ * When requested and enabled, motion adaptive temporal
+ * deinterlacing will be used on interlaced content.
+ *
+ * When multiple de-interlacing options are requested and
+ * enabled, the back-end implementation chooses the best
+ * algorithm to apply.
  */
 #define VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL         (VdpVideoMixerFeature)0
 /**
  * \hideinitializer
  * \brief A VdpVideoMixerFeature.
  *
- * When requested and enabled, this enables a more advanced 
- * version of temporal de-interlacing, that additionally uses 
- * edge-guided spatial interpolation. 
- *  
- * When multiple de-interlacing options are requested and 
- * enabled, the back-end implementation chooses the best 
- * algorithm to apply. 
+ * When requested and enabled, this enables a more advanced
+ * version of temporal de-interlacing, that additionally uses
+ * edge-guided spatial interpolation.
+ *
+ * When multiple de-interlacing options are requested and
+ * enabled, the back-end implementation chooses the best
+ * algorithm to apply.
  */
 #define VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL_SPATIAL (VdpVideoMixerFeature)1
 /**
@@ -2960,148 +2960,148 @@ typedef uint32_t VdpVideoMixerFeature;
  * \brief A VdpVideoMixerFeature.
  *
  * When requested and enabled, cadence detection will be enabled
- * on interlaced content and the video mixer will try to extract 
- * progressive frames from pull-down material. 
+ * on interlaced content and the video mixer will try to extract
+ * progressive frames from pull-down material.
  */
 #define VDP_VIDEO_MIXER_FEATURE_INVERSE_TELECINE             (VdpVideoMixerFeature)2
 /**
  * \hideinitializer
  * \brief A VdpVideoMixerFeature.
  *
- * When requested and enabled, a noise reduction algorithm will 
- * be applied to the video. 
+ * When requested and enabled, a noise reduction algorithm will
+ * be applied to the video.
  */
 #define VDP_VIDEO_MIXER_FEATURE_NOISE_REDUCTION              (VdpVideoMixerFeature)3
 /**
  * \hideinitializer
  * \brief A VdpVideoMixerFeature.
  *
- * When requested and enabled, a sharpening algorithm will be 
- * applied to the video. 
+ * When requested and enabled, a sharpening algorithm will be
+ * applied to the video.
  */
 #define VDP_VIDEO_MIXER_FEATURE_SHARPNESS                    (VdpVideoMixerFeature)4
 /**
  * \hideinitializer
  * \brief A VdpVideoMixerFeature.
  *
- * When requested and enabled, the alpha of the rendered 
- * surface, which is normally set to the alpha of the background 
- * color, will be forced to 0.0 on pixels corresponding to 
- * source video surface luminance values in the range specified 
+ * When requested and enabled, the alpha of the rendered
+ * surface, which is normally set to the alpha of the background
+ * color, will be forced to 0.0 on pixels corresponding to
+ * source video surface luminance values in the range specified
  * by attributes \ref VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MIN_LUMA
- * to \ref VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MAX_LUMA. This 
- * keying is performed after scaling and de-interlacing. 
+ * to \ref VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MAX_LUMA. This
+ * keying is performed after scaling and de-interlacing.
  */
 #define VDP_VIDEO_MIXER_FEATURE_LUMA_KEY                     (VdpVideoMixerFeature)5
 
 /**
  * \brief A VdpVideoMixer creation parameter.
- * 
+ *
  * When a VdpVideoMixer is created, certain parameters may be
  * supplied. Each parameter is named via a specific
- * VdpVideoMixerParameter value. 
- *  
- * Each parameter has a specific type, and specific default 
- * value if not specified at VdpVideoMixer creation time. The 
- * application may query the legal supported range for some 
- * parameters. 
+ * VdpVideoMixerParameter value.
+ *
+ * Each parameter has a specific type, and specific default
+ * value if not specified at VdpVideoMixer creation time. The
+ * application may query the legal supported range for some
+ * parameters.
  */
 typedef uint32_t VdpVideoMixerParameter;
 
-/** 
- * \hideinitializer 
- * \brief The exact width of input video surfaces. 
- *  
- * This parameter's type is uint32_t. 
- *  
- * This parameter defaults to 0 if not specified, which entails 
- * that it must be specified. 
- *  
- * The application may query this parameter's supported 
- * range. 
+/**
+ * \hideinitializer
+ * \brief The exact width of input video surfaces.
+ *
+ * This parameter's type is uint32_t.
+ *
+ * This parameter defaults to 0 if not specified, which entails
+ * that it must be specified.
+ *
+ * The application may query this parameter's supported
+ * range.
  */
 #define VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_WIDTH  (VdpVideoMixerParameter)0
-/** 
- * \hideinitializer 
- * \brief The exact height of input video surfaces. 
- *  
- * This parameter's type is uint32_t. 
- *  
- * This parameter defaults to 0 if not specified, which entails 
- * that it must be specified. 
- *  
- * The application may query this parameter's supported 
+/**
+ * \hideinitializer
+ * \brief The exact height of input video surfaces.
+ *
+ * This parameter's type is uint32_t.
+ *
+ * This parameter defaults to 0 if not specified, which entails
+ * that it must be specified.
+ *
+ * The application may query this parameter's supported
  * range.
- */ 
+ */
 #define VDP_VIDEO_MIXER_PARAMETER_VIDEO_SURFACE_HEIGHT (VdpVideoMixerParameter)1
-/** 
- * \hideinitializer 
- * \brief The chroma type of the input video surfaces the will 
+/**
+ * \hideinitializer
+ * \brief The chroma type of the input video surfaces the will
  *        process.
- *  
+ *
  * This parameter's type is VdpChromaType.
- *  
+ *
  * If not specified, this parameter defaults to
- * VDP_CHROMA_TYPE_420. 
- *  
- * The application may not query this application's supported 
+ * VDP_CHROMA_TYPE_420.
+ *
+ * The application may not query this application's supported
  * range, since it is a potentially disjoint enumeration.
- */ 
+ */
 #define VDP_VIDEO_MIXER_PARAMETER_CHROMA_TYPE          (VdpVideoMixerParameter)2
-/** 
- * \hideinitializer 
- * \brief The number of auxiliary layers in the mixer's 
+/**
+ * \hideinitializer
+ * \brief The number of auxiliary layers in the mixer's
  *        compositing model.
- *  
- * Note that this indicates the maximum number of layers that 
- * may be processed by a given \ref VdpVideoMixer "VdpVideoMixer" 
- * object. Each individual \ref VdpVideoMixerRender invocation 
- * may choose to use a different number of actual layers, from 0 
+ *
+ * Note that this indicates the maximum number of layers that
+ * may be processed by a given \ref VdpVideoMixer "VdpVideoMixer"
+ * object. Each individual \ref VdpVideoMixerRender invocation
+ * may choose to use a different number of actual layers, from 0
  * up to this limit.
- * 
- * This attribute's type is uint32_t. 
- *  
+ *
+ * This attribute's type is uint32_t.
+ *
  * If not specified, this parameter defaults to 0.
- *  
- * The application may query this parameter's supported 
+ *
+ * The application may query this parameter's supported
  * range.
- */ 
+ */
 #define VDP_VIDEO_MIXER_PARAMETER_LAYERS               (VdpVideoMixerParameter)3
 
 /**
- * \brief An adjustable attribute of VdpVideoMixer operation. 
- *  
- * Various attributes of VdpVideoMixer operation may be adjusted 
+ * \brief An adjustable attribute of VdpVideoMixer operation.
+ *
+ * Various attributes of VdpVideoMixer operation may be adjusted
  * at any time. Each attribute is named via a specific
- * VdpVideoMixerAttribute value. 
- *  
- * Each attribute has a specific type, and specific default 
- * value if not specified at VdpVideoMixer creation time. The 
- * application may query the legal supported range for some 
- * attributes. 
+ * VdpVideoMixerAttribute value.
+ *
+ * Each attribute has a specific type, and specific default
+ * value if not specified at VdpVideoMixer creation time. The
+ * application may query the legal supported range for some
+ * attributes.
  */
 typedef uint32_t VdpVideoMixerAttribute;
 
-/** 
- * \hideinitializer 
- * \brief The background color in the VdpVideoMixer's compositing 
+/**
+ * \hideinitializer
+ * \brief The background color in the VdpVideoMixer's compositing
  *        model.
- *  
- * This attribute's type is VdpColor. 
- *  
- * This parameter defaults to black (all color components 0.0 
+ *
+ * This attribute's type is VdpColor.
+ *
+ * This parameter defaults to black (all color components 0.0
  * and alpha 1.0).
- *  
- * The application may not query this parameter's supported 
+ *
+ * The application may not query this parameter's supported
  * range, since the type is not scalar.
- */ 
+ */
 #define VDP_VIDEO_MIXER_ATTRIBUTE_BACKGROUND_COLOR      (VdpVideoMixerAttribute)0
-/** 
- * \hideinitializer 
- * \brief The color-space conversion matrix used by the 
+/**
+ * \hideinitializer
+ * \brief The color-space conversion matrix used by the
  *        VdpVideoMixer.
- *  
- * This attribute's type is \ref VdpCSCMatrix. 
+ *
+ * This attribute's type is \ref VdpCSCMatrix.
  *
  * Note: When using \ref VdpVideoMixerGetAttributeValues to retrieve the
  * current CSC matrix, the attribute_values array must contain a pointer to
@@ -3109,7 +3109,7 @@ typedef uint32_t VdpVideoMixerAttribute;
  * either initialize the referenced CSC matrix to the current value, *or*
  * clear the supplied pointer to NULL, if the previous set call supplied a
  * value of NULL in parameter_values, to request the default matrix.
- * 
+ *
  * \code
  * VdpCSCMatrix   matrix;
  * VdpCSCMatrix * matrix_ptr;
@@ -3118,83 +3118,83 @@ typedef uint32_t VdpVideoMixerAttribute;
  * \endcode
  *
  * This parameter defaults to a matrix suitable for ITU-R BT.601
- * input surfaces, with no procamp adjustments. 
- *  
- * The application may not query this parameter's supported 
+ * input surfaces, with no procamp adjustments.
+ *
+ * The application may not query this parameter's supported
  * range, since the type is not scalar.
- */ 
+ */
 #define VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX            (VdpVideoMixerAttribute)1
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief The amount of noise reduction algorithm to apply.
- *  
- * This attribute's type is float. 
- *  
- * This parameter defaults to 0.0, which equates to no noise 
- * reduction.
- *  
- * The application may query this parameter's supported range. 
- * However, the range is fixed as 0.0...1.0. 
- */ 
-#define VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL (VdpVideoMixerAttribute)2
-/** 
- * \hideinitializer 
- * \brief The amount of sharpening, or blurring, to apply.
- *  
+ *
  * This attribute's type is float.
- *  
- * This parameter defaults to 0.0, which equates to no 
- * sharpening. 
- *  
- * Positive values request sharpening. Negative values request 
- * blurring. 
- *  
- * The application may query this parameter's supported range. 
- * However, the range is fixed as -1.0...1.0. 
- */ 
+ *
+ * This parameter defaults to 0.0, which equates to no noise
+ * reduction.
+ *
+ * The application may query this parameter's supported range.
+ * However, the range is fixed as 0.0...1.0.
+ */
+#define VDP_VIDEO_MIXER_ATTRIBUTE_NOISE_REDUCTION_LEVEL (VdpVideoMixerAttribute)2
+/**
+ * \hideinitializer
+ * \brief The amount of sharpening, or blurring, to apply.
+ *
+ * This attribute's type is float.
+ *
+ * This parameter defaults to 0.0, which equates to no
+ * sharpening.
+ *
+ * Positive values request sharpening. Negative values request
+ * blurring.
+ *
+ * The application may query this parameter's supported range.
+ * However, the range is fixed as -1.0...1.0.
+ */
 #define VDP_VIDEO_MIXER_ATTRIBUTE_SHARPNESS_LEVEL       (VdpVideoMixerAttribute)3
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief The minimum luma value for the luma key algorithm.
- *  
- * This attribute's type is float. 
- *  
+ *
+ * This attribute's type is float.
+ *
  * This parameter defaults to 0.0.
- *  
- * The application may query this parameter's supported range. 
- * However, the range is fixed as 0.0...1.0. 
- */ 
+ *
+ * The application may query this parameter's supported range.
+ * However, the range is fixed as 0.0...1.0.
+ */
 #define VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MIN_LUMA     (VdpVideoMixerAttribute)4
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief The maximum luma value for the luma key algorithm.
- *  
- * This attribute's type is float. 
- *  
+ *
+ * This attribute's type is float.
+ *
  * This parameter defaults to 1.0.
- *  
- * The application may query this parameter's supported range. 
- * However, the range is fixed as 0.0...1.0. 
- */ 
+ *
+ * The application may query this parameter's supported range.
+ * However, the range is fixed as 0.0...1.0.
+ */
 #define VDP_VIDEO_MIXER_ATTRIBUTE_LUMA_KEY_MAX_LUMA     (VdpVideoMixerAttribute)5
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief Whether de-interlacers should operate solely on luma, and bob chroma.
- *  
+ *
  * Note: This attribute only affects advanced de-interlacing algorithms, not
  * bob or weave.
  *
  * This attribute's type is uint8_t.
- *  
+ *
  * This parameter defaults to 0.
- *  
- * The application may query this parameter's supported range. 
- * However, the range is fixed as 0 (no/off) ... 1 (yes/on). 
- */ 
+ *
+ * The application may query this parameter's supported range.
+ * However, the range is fixed as 0 (no/off) ... 1 (yes/on).
+ */
 #define VDP_VIDEO_MIXER_ATTRIBUTE_SKIP_CHROMA_DEINTERLACE (VdpVideoMixerAttribute)6
 
 /**
- * \brief Query the implementation's support for a specific 
+ * \brief Query the implementation's support for a specific
  *        feature.
  * \param[in] device The device to query.
  * \param[in] feature The feature for which support is to be
@@ -3210,12 +3210,12 @@ typedef VdpStatus VdpVideoMixerQueryFeatureSupport(
 );
 
 /**
- * \brief Query the implementation's support for a specific 
+ * \brief Query the implementation's support for a specific
  *        parameter.
  * \param[in] device The device to query.
  * \param[in] parameter The parameter for which support is to be
  *       queried.
- * \param[out] is_supported Is the specified parameter 
+ * \param[out] is_supported Is the specified parameter
  *       supported?
  * \return VdpStatus The completion status of the operation.
  */
@@ -3227,7 +3227,7 @@ typedef VdpStatus VdpVideoMixerQueryParameterSupport(
 );
 
 /**
- * \brief Query the implementation's support for a specific 
+ * \brief Query the implementation's support for a specific
  *        attribute.
  * \param[in] device The device to query.
  * \param[in] feature The feature for which support is to be
@@ -3243,7 +3243,7 @@ typedef VdpStatus VdpVideoMixerQueryAttributeSupport(
 );
 
 /**
- * \brief Query the implementation's supported for a specific 
+ * \brief Query the implementation's supported for a specific
  *        parameter.
  * \param[in] device The device to query.
  * \param[in] parameter The parameter for which support is to be
@@ -3261,7 +3261,7 @@ typedef VdpStatus VdpVideoMixerQueryParameterValueRange(
 );
 
 /**
- * \brief Query the implementation's supported for a specific 
+ * \brief Query the implementation's supported for a specific
  *        attribute.
  * \param[in] device The device to query.
  * \param[in] attribute The attribute for which support is to be
@@ -3285,22 +3285,22 @@ typedef uint32_t VdpVideoMixer;
 
 /**
  * \brief Create a VdpVideoMixer.
- * \param[in] device The device that will contain the mixer. 
+ * \param[in] device The device that will contain the mixer.
  * \param[in] feature_count The number of features to request.
  * \param[in] features The list of features to request.
  * \param[in] parameter_count The number of parameters to set.
  * \param[in] parameters The list of parameters to set.
  * \param[in] parameter_values The values for the parameters. Note that each
  *     entry in the value array is a pointer to the actual value. In other
- *     words, the values themselves are not cast to "void *" and passed 
+ *     words, the values themselves are not cast to "void *" and passed
  *     "inside" the array.
  * \param[out] mixer The new mixer's handle.
- * \return VdpStatus The completion status of the operation. 
- *  
- * Initially, all requested features will be disabled. They can 
- * be enabled using \ref VdpVideoMixerSetFeatureEnables. 
- *  
- * Initially, all attributes will have default values. Values 
+ * \return VdpStatus The completion status of the operation.
+ *
+ * Initially, all requested features will be disabled. They can
+ * be enabled using \ref VdpVideoMixerSetFeatureEnables.
+ *
+ * Initially, all attributes will have default values. Values
  * can be changed using \ref VdpVideoMixerSetAttributeValues.
  */
 typedef VdpStatus VdpVideoMixerCreate(
@@ -3319,10 +3319,10 @@ typedef VdpStatus VdpVideoMixerCreate(
 /**
  * \brief Enable or disable features.
  * \param[in] mixer The mixer to manipulate.
- * \param[in] feature_count The number of features to 
+ * \param[in] feature_count The number of features to
  *       enable/disable.
  * \param[in] features The list of features to enable/disable.
- * \param[in] feature_enables The list of new feature enable 
+ * \param[in] feature_enables The list of new feature enable
  *       values.
  * \return VdpStatus The completion status of the operation.
  */
@@ -3340,7 +3340,7 @@ typedef VdpStatus VdpVideoMixerSetFeatureEnables(
  * \param[in] attributes The list of attributes to set.
  * \param[in] attribute_values The values for the attributes. Note that each
  *     entry in the value array is a pointer to the actual value. In other
- *     words, the values themselves are not cast to "void *" and passed 
+ *     words, the values themselves are not cast to "void *" and passed
  *     "inside" the array. A NULL pointer requests that the default value be
  *     set for that attribute.
  * \return VdpStatus The completion status of the operation.
@@ -3353,12 +3353,12 @@ typedef VdpStatus VdpVideoMixerSetAttributeValues(
 );
 
 /**
- * \brief Retrieve whether features were requested at creation 
+ * \brief Retrieve whether features were requested at creation
  *        time.
  * \param[in] mixer The mixer to query.
  * \param[in] feature_count The number of features to query.
  * \param[in] features The list of features to query.
- * \param[out] feature_supported A list of values indicating 
+ * \param[out] feature_supported A list of values indicating
  *       whether the feature was requested, and hence is
  *       available.
  * \return VdpStatus The completion status of the operation.
@@ -3376,7 +3376,7 @@ typedef VdpStatus VdpVideoMixerGetFeatureSupport(
  * \param[in] mixer The mixer to manipulate.
  * \param[in] feature_count The number of features to query.
  * \param[in] features The list of features to query.
- * \param[out] feature_enabled A list of values indicating 
+ * \param[out] feature_enabled A list of values indicating
  *       whether the feature is enabled.
  * \return VdpStatus The completion status of the operation.
  */
@@ -3393,7 +3393,7 @@ typedef VdpStatus VdpVideoMixerGetFeatureEnables(
  * \param[in] mixer The mixer to manipulate.
  * \param[in] parameter_count The number of parameters to query.
  * \param[in] parameters The list of parameters to query.
- * \param[out] parameter_values The list of current values for 
+ * \param[out] parameter_values The list of current values for
  *     the parameters. Note that each entry in the value array is a pointer to
  *     storage that will receive the actual value. If the attribute's type is
  *     a pointer itself, please closely read the documentation for that
@@ -3413,7 +3413,7 @@ typedef VdpStatus VdpVideoMixerGetParameterValues(
  * \param[in] mixer The mixer to manipulate.
  * \param[in] attribute_count The number of attributes to query.
  * \param[in] attributes The list of attributes to query.
- * \param[out] attribute_values The list of current values for 
+ * \param[out] attribute_values The list of current values for
  *     the attributes. Note that each entry in the value array is a pointer to
  *     storage that will receive the actual value. If the attribute's type is
  *     a pointer itself, please closely read the documentation for that
@@ -3437,62 +3437,62 @@ typedef VdpStatus VdpVideoMixerDestroy(
     VdpVideoMixer mixer
 );
 
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief The structure of the picture present in a \ref
  *        VdpVideoSurface "VdpVideoSurface".
- */ 
+ */
 typedef enum {
-    /** 
-     * The picture is a field, and is the top field of the surface. 
-     */ 
+    /**
+     * The picture is a field, and is the top field of the surface.
+     */
     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD,
-    /** 
+    /**
      * The picture is a field, and is the bottom field of the
      * surface.
      */
     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD,
-    /** 
-     * The picture is a frame, and hence is the entire surface. 
-     */ 
+    /**
+     * The picture is a frame, and hence is the entire surface.
+     */
     VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME,
 } VdpVideoMixerPictureStructure;
 
 #define VDP_LAYER_VERSION 0
 
-/** 
- * \brief Definition of an additional \ref VdpOutputSurface 
+/**
+ * \brief Definition of an additional \ref VdpOutputSurface
  *        "VdpOutputSurface" layer in the composting model.
- */ 
+ */
 typedef struct {
     /**
      * This field must be filled with VDP_LAYER_VERSION
      */
     uint32_t struct_version;
-    /** 
-     * The surface to composite from. 
-     */ 
+    /**
+     * The surface to composite from.
+     */
     VdpOutputSurface source_surface;
-    /** 
-     * The sub-rectangle of the source surface to use. If NULL, the 
-     * entire source surface will be used. 
-     */ 
+    /**
+     * The sub-rectangle of the source surface to use. If NULL, the
+     * entire source surface will be used.
+     */
     VdpRect const *  source_rect;
-    /** 
-     * The sub-rectangle of the destination surface to map 
-     * this layer into. This rectangle is relative to the entire 
-     * destination surface. This rectangle will be clipped by \ref 
-     * VdpVideoMixerRender's \b destination_rect. If NULL, the 
-     * destination rectangle will be sized to match the source 
-     * rectangle, and will be located at the origin. 
-     */ 
+    /**
+     * The sub-rectangle of the destination surface to map
+     * this layer into. This rectangle is relative to the entire
+     * destination surface. This rectangle will be clipped by \ref
+     * VdpVideoMixerRender's \b destination_rect. If NULL, the
+     * destination rectangle will be sized to match the source
+     * rectangle, and will be located at the origin.
+     */
      VdpRect const * destination_rect;
 } VdpLayer;
 
 /**
- * \brief Perform a video post-processing and compositing 
+ * \brief Perform a video post-processing and compositing
  *        operation.
- * \param[in] mixer The mixer object that will perform the 
+ * \param[in] mixer The mixer object that will perform the
  *       mixing/rendering operation.
  * \param[in] background_surface A background image. If set to any value other
  *       than VDP_INVALID_HANDLE, the specific surface will be used instead of
@@ -3503,7 +3503,7 @@ typedef struct {
  *       be used as the background layer. The specified region will be
  *       extracted and scaled to match the size of destination_rect. If NULL,
  *       the entire background_surface will be used.
- * \param[in] current_picture_structure The picture structure of 
+ * \param[in] current_picture_structure The picture structure of
  *       the field/frame to be processed. This field/frame is
  *       presented in the \b video_surface_current parameter. If
  *       frame, then all \b video_surface_* parameters are
@@ -3511,7 +3511,7 @@ typedef struct {
  *       video_surface_* parameters are assumed to be fields,
  *       with alternating top/bottom-ness derived from
  *       video_surface_current.
- * \param[in] video_surfaces_past_count The number of provided 
+ * \param[in] video_surfaces_past_count The number of provided
  *       fields/frames prior to the current picture.
  * \param[in] video_surfaces_past The fields/frames prior to the
  *       current field/frame. Note that array index 0 is the
@@ -3519,24 +3519,24 @@ typedef struct {
  *       field/frame, with increasing array indices used for
  *       older frames. Unavailable entries may be set to
  *       \ref VDP_INVALID_HANDLE.
- * \param[in] video_surface_current The field/frame to be 
+ * \param[in] video_surface_current The field/frame to be
  *       processed.
  * \param[in] video_surfaces_future_count The number of provided
  *       fields/frames following the current picture.
- * \param[in] video_surfaces_future The fields/frames that 
+ * \param[in] video_surfaces_future The fields/frames that
  *       follow the current field/frame. Note that array index 0
  *       is the field/frame temporally nearest to the current
  *       field/frame, with increasing array indices used for
  *       newer frames. Unavailable entries may be set to \ref
  *       VDP_INVALID_HANDLE.
- * \param[in] video_source_rect The sub-rectangle of the source 
+ * \param[in] video_source_rect The sub-rectangle of the source
  *       video surface to extract and process. If NULL, the
  *       entire surface will be used.
  * \param[in] destination_surface
- * \param[in] destination_rect The sub-rectangle of the 
+ * \param[in] destination_rect The sub-rectangle of the
  *       destination surface to modify. Note that rectangle clips
  *       all other actions.
- * \param[in] destination_video_rect The sub-rectangle of the 
+ * \param[in] destination_video_rect The sub-rectangle of the
  *       destination surface that will contain the processed
  *       video. This rectangle is relative to the entire
  *       destination surface. This rectangle is clipped by \b
@@ -3547,10 +3547,10 @@ typedef struct {
  *       composite above the video.
  * \param[in] layers The array of additional layers to composite
  *       above the video.
- * \return VdpStatus The completion status of the operation. 
- *  
- * For a complete discussion of how to use this API, please see 
- * \ref video_mixer_usage. 
+ * \return VdpStatus The completion status of the operation.
+ *
+ * For a complete discussion of how to use this API, please see
+ * \ref video_mixer_usage.
  */
 typedef VdpStatus VdpVideoMixerRender(
     VdpVideoMixer                 mixer,
@@ -3581,42 +3581,42 @@ typedef VdpStatus VdpVideoMixerRender(
  * the associated timestamp is reached, the surface is displayed
  * to the user. This timestamp-based approach yields high
  * quality video delivery.
- *  
- * The exact location of the displayed content is Window System 
- * specific. For this reason, the \ref api_winsys provides an 
- * API to create a \ref VdpPresentationQueueTarget object (e.g. 
- * via \ref VdpPresentationQueueTargetCreateX11) which 
- * encapsulates this information. 
- *  
- * Note that the presentation queue performs no scaling of 
- * surfaces to match the display target's size, aspect ratio, 
- * etc. 
- *  
- * Surfaces that are too large to fit into the display target 
- * will be clipped. Surfaces that are too small to fill the 
- * display target will be aligned to the top-left corner of the 
- * display target, with the balance of the display target being 
+ *
+ * The exact location of the displayed content is Window System
+ * specific. For this reason, the \ref api_winsys provides an
+ * API to create a \ref VdpPresentationQueueTarget object (e.g.
+ * via \ref VdpPresentationQueueTargetCreateX11) which
+ * encapsulates this information.
+ *
+ * Note that the presentation queue performs no scaling of
+ * surfaces to match the display target's size, aspect ratio,
+ * etc.
+ *
+ * Surfaces that are too large to fit into the display target
+ * will be clipped. Surfaces that are too small to fill the
+ * display target will be aligned to the top-left corner of the
+ * display target, with the balance of the display target being
  * filled with a constant configurable "background" color.
- *  
- * Note that the presentation queue operates in a manner that is 
- * semantically equivalent to an overlay surface, with any 
- * required color key painting hidden internally. However, 
- * implementations are free to use whatever semantically 
+ *
+ * Note that the presentation queue operates in a manner that is
+ * semantically equivalent to an overlay surface, with any
+ * required color key painting hidden internally. However,
+ * implementations are free to use whatever semantically
  * equivalent technique they wish. Note that implementations
  * that actually use color-keyed overlays will typically use
  * the "background" color as the overlay color key value, so
  * this color should be chosen with care.
- *  
- * @{ 
+ *
+ * @{
  */
 
-/** 
+/**
  * \brief The representation of a point in time.
- * 
+ *
  * VdpTime timestamps are intended to be a high-precision timing
  * system, potentially independent from any other time domain in
  * the system.
- * 
+ *
  * Time is represented in units of nanoseconds. The origin
  * (i.e. the time represented by a value of 0) is implementation
  * dependent.
@@ -3624,12 +3624,12 @@ typedef VdpStatus VdpVideoMixerRender(
 typedef uint64_t VdpTime;
 
 /**
- * \brief An opaque handle representing the location where 
+ * \brief An opaque handle representing the location where
  *        video will be presented.
- *  
+ *
  * VdpPresentationQueueTarget are created using a \ref api_winsys
- * specific API, such as \ref 
- * VdpPresentationQueueTargetCreateX11. 
+ * specific API, such as \ref
+ * VdpPresentationQueueTargetCreateX11.
  */
 typedef uint32_t VdpPresentationQueueTarget;
 
@@ -3643,18 +3643,18 @@ typedef VdpStatus VdpPresentationQueueTargetDestroy(
 );
 
 /**
- * \brief An opaque handle representing a presentation queue 
+ * \brief An opaque handle representing a presentation queue
  *        object.
  */
 typedef uint32_t VdpPresentationQueue;
 
 /**
  * \brief Create a VdpPresentationQueue.
- * \param[in] device The device that will contain the queue. 
- * \param[in] presentation_queue_target The location to display 
+ * \param[in] device The device that will contain the queue.
+ * \param[in] presentation_queue_target The location to display
  *       the content.
  * \param[out] presentation_queue The new queue's handle.
- * \return VdpStatus The completion status of the operation. 
+ * \return VdpStatus The completion status of the operation.
  *
  * Note: The initial value for the background color will be set to
  * an implementation-defined value.
@@ -3677,9 +3677,9 @@ typedef VdpStatus VdpPresentationQueueDestroy(
 
 /**
  * \brief Configure the background color setting.
- * \param[in] presentation_queue The queue to manipulate. 
- * \param[in] background_color The new background color. 
- *  
+ * \param[in] presentation_queue The queue to manipulate.
+ * \param[in] background_color The new background color.
+ *
  * Note: Implementations may choose whether to apply the
  * new background color value immediately, or defer it until
  * the next surface is presented.
@@ -3691,7 +3691,7 @@ typedef VdpStatus VdpPresentationQueueSetBackgroundColor(
 
 /**
  * \brief Retrieve the current background color setting.
- * \param[in] presentation_queue The queue to query. 
+ * \param[in] presentation_queue The queue to query.
  * \param[out] background_color The current background color.
  */
 typedef VdpStatus VdpPresentationQueueGetBackgroundColor(
@@ -3700,11 +3700,11 @@ typedef VdpStatus VdpPresentationQueueGetBackgroundColor(
 );
 
 /**
- * \brief Retrieve the presentation queue's "current" time. 
- * \param[in] presentation_queue The queue to query. 
- * \param[out] current_time The current time, which may 
+ * \brief Retrieve the presentation queue's "current" time.
+ * \param[in] presentation_queue The queue to query.
+ * \param[out] current_time The current time, which may
  *       represent a point between display VSYNC events.
- * \return VdpStatus The completion status of the operation. 
+ * \return VdpStatus The completion status of the operation.
  */
 typedef VdpStatus VdpPresentationQueueGetTime(
     VdpPresentationQueue presentation_queue,
@@ -3722,11 +3722,11 @@ typedef VdpStatus VdpPresentationQueueGetTime(
  * \param[in] clip_height If set to a non-zero value, the presentation queue
  *       will display only clip_height lines of the surface (anchored to the
  *       top-left corner of the surface.
- * \param[in] earliest_presentation_time The timestamp 
+ * \param[in] earliest_presentation_time The timestamp
  *       associated with the surface. The presentation queue
  *       will not display the surface until the presentation
  *       queue's current time is at least this value.
- * \return VdpStatus The completion status of the operation. 
+ * \return VdpStatus The completion status of the operation.
  *
  * Applications may choose to allow resizing of the presentation queue target
  * (which may be e.g. a regular Window when using an X11-based
@@ -3743,7 +3743,7 @@ typedef VdpStatus VdpPresentationQueueGetTime(
  * Using this technique, an application's response to window resizing may
  * simply be to render to, and display, a different region of the surface,
  * rather than de-/re-allocation of surfaces to match the updated window size.
- */ 
+ */
 typedef VdpStatus VdpPresentationQueueDisplay(
     VdpPresentationQueue presentation_queue,
     VdpOutputSurface     surface,
@@ -3755,15 +3755,15 @@ typedef VdpStatus VdpPresentationQueueDisplay(
 /**
  * \brief Wait for a surface to finish being displayed.
  * \param[in] presentation_queue The queue to query.
- * \param[in] surface The surface to wait for. 
- * \param[out] first_presentation_time The timestamp of the 
+ * \param[in] surface The surface to wait for.
+ * \param[out] first_presentation_time The timestamp of the
  *       VSYNC at which this surface was first displayed. Note
  *       that 0 means the surface was never displayed.
- * \return VdpStatus The completion status of the operation. 
- *  
- * Note that this API will block indefinitely if queried about 
- * the surface most recently added to a presentation queue, 
- * since there is no other surface that could possibly replace 
+ * \return VdpStatus The completion status of the operation.
+ *
+ * Note that this API will block indefinitely if queried about
+ * the surface most recently added to a presentation queue,
+ * since there is no other surface that could possibly replace
  * the queried surface.
  */
 typedef VdpStatus VdpPresentationQueueBlockUntilSurfaceIdle(
@@ -3773,8 +3773,8 @@ typedef VdpStatus VdpPresentationQueueBlockUntilSurfaceIdle(
     VdpTime *            first_presentation_time
 );
 
-/** 
- * \hideinitializer 
+/**
+ * \hideinitializer
  * \brief The status of a surface within a presentation queue.
  */
 typedef enum {
@@ -3789,13 +3789,13 @@ typedef enum {
 /**
  * \brief Poll the current queue status of a surface.
  * \param[in] presentation_queue The queue to query.
- * \param[in] surface The surface to query. 
- * \param[out] status The current status of the surface within 
+ * \param[in] surface The surface to query.
+ * \param[out] status The current status of the surface within
  *       the queue.
- * \param[out] first_presentation_time The timestamp of the 
+ * \param[out] first_presentation_time The timestamp of the
  *       VSYNC at which this surface was first displayed. Note
  *       that 0 means the surface was never displayed.
- * \return VdpStatus The completion status of the operation. 
+ * \return VdpStatus The completion status of the operation.
  */
 typedef VdpStatus VdpPresentationQueueQuerySurfaceStatus(
     VdpPresentationQueue         presentation_queue,
@@ -3808,56 +3808,56 @@ typedef VdpStatus VdpPresentationQueueQuerySurfaceStatus(
 /*@}*/
 
 /**
- * \defgroup display_preemption Display Preemption 
- *  
- * The Window System may operate within a frame-work (such as 
- * Linux's VT switching) where the display is shared between the 
- * Window System (e.g. X) and some other output mechanism (e.g. 
- * the VT.) Given this scenario, the Window System's control of 
- * the display could be preempted, and restored, at any time. 
- * 
- * VDPAU does not mandate that implementations hide such 
- * preemptions from VDPAU client applications; doing so may 
- * impose extreme burdens upon VDPAU implementations. Equally, 
- * however, implementations are free to hide such preemptions 
- * from client applications. 
- *  
+ * \defgroup display_preemption Display Preemption
+ *
+ * The Window System may operate within a frame-work (such as
+ * Linux's VT switching) where the display is shared between the
+ * Window System (e.g. X) and some other output mechanism (e.g.
+ * the VT.) Given this scenario, the Window System's control of
+ * the display could be preempted, and restored, at any time.
+ *
+ * VDPAU does not mandate that implementations hide such
+ * preemptions from VDPAU client applications; doing so may
+ * impose extreme burdens upon VDPAU implementations. Equally,
+ * however, implementations are free to hide such preemptions
+ * from client applications.
+ *
  * VDPAU allows implementations to inform the client application
- * when such a preemption has occurred, and then refuse to 
- * continue further operation. 
- * 
+ * when such a preemption has occurred, and then refuse to
+ * continue further operation.
+ *
  * Similarly, some form of fatal hardware error could prevent further
  * operation of the VDPAU implementation, without a complete
  * re-initialization.
  *
- * The following discusses the behavior of implementations that 
- * choose not to hide preemption from client applications. 
- *  
- * When preemption occurs, VDPAU internally destroys all 
- * objects; the client application need not do this. However, if 
- * the client application wishes to continue operation, it must 
- * recreate all objects that it uses. It is probable that this 
- * recreation will not succeed until the display ownership is 
- * restored to the Window System. 
- *  
- * Once preemption has occurred, all VDPAU entry points will 
- * return the specific error code \ref 
- * VDP_STATUS_DISPLAY_PREEMPTED. 
- *  
- * VDPAU client applications may also be notified of such 
- * preemptions and fatal errors via a callback. See \ref 
- * VdpPreemptionCallbackRegister for more details. 
- * 
+ * The following discusses the behavior of implementations that
+ * choose not to hide preemption from client applications.
+ *
+ * When preemption occurs, VDPAU internally destroys all
+ * objects; the client application need not do this. However, if
+ * the client application wishes to continue operation, it must
+ * recreate all objects that it uses. It is probable that this
+ * recreation will not succeed until the display ownership is
+ * restored to the Window System.
+ *
+ * Once preemption has occurred, all VDPAU entry points will
+ * return the specific error code \ref
+ * VDP_STATUS_DISPLAY_PREEMPTED.
+ *
+ * VDPAU client applications may also be notified of such
+ * preemptions and fatal errors via a callback. See \ref
+ * VdpPreemptionCallbackRegister for more details.
+ *
  * @{
  */
 
 /**
- * \brief A callback to notify the client application that a 
+ * \brief A callback to notify the client application that a
  *        device's display has been preempted.
  * \param[in] device The device that had its display preempted.
- * \param[in] context The client-supplied callback context 
+ * \param[in] context The client-supplied callback context
  *       information.
- * \return void No return value 
+ * \return void No return value
  */
 typedef void VdpPreemptionCallback(
     VdpDevice device,
@@ -3866,13 +3866,13 @@ typedef void VdpPreemptionCallback(
 
 /**
  * \brief Configure the display preemption callback.
- * \param[in] device The device to be monitored for preemption. 
- * \param[in] callback The client application's callback 
+ * \param[in] device The device to be monitored for preemption.
+ * \param[in] callback The client application's callback
  *       function. If NULL, the callback is unregistered.
- * \param[in] context The client-supplied callback context 
+ * \param[in] context The client-supplied callback context
  *       information. This information will be passed to the
  *       callback function if/when invoked.
- * \return VdpStatus The completion status of the operation. 
+ * \return VdpStatus The completion status of the operation.
  */
 typedef VdpStatus VdpPreemptionCallbackRegister(
     VdpDevice             device,
@@ -3884,19 +3884,19 @@ typedef VdpStatus VdpPreemptionCallbackRegister(
 
 /**
  * \defgroup get_proc_address Entry Point Retrieval
- *  
+ *
  * In order to facilitate multiple implementations of VDPAU
  * co-existing within a single process, all functionality is
  * available via function pointers. The mechanism to retrieve
  * those function pointers is described below.
- *  
- * @{ 
+ *
+ * @{
  */
 
-/** 
- * \brief A type suitable for \ref VdpGetProcAddress 
+/**
+ * \brief A type suitable for \ref VdpGetProcAddress
  *        "VdpGetProcAddress"'s \b function_id parameter.
- */ 
+ */
 typedef uint32_t VdpFuncId;
 
 /** \hideinitializer */
@@ -4024,14 +4024,14 @@ typedef uint32_t VdpFuncId;
 
 #define VDP_FUNC_ID_BASE_WINSYS 0x1000
 
-/** 
+/**
  * \brief Retrieve a VDPAU function pointer.
  * \param[in] device The device that the function will operate
  *       against.
- * \param[in] function_id The specific function to retrieve. 
+ * \param[in] function_id The specific function to retrieve.
  * \param[out] function_pointer The actual pointer for the
  *       application to call.
- * \return VdpStatus The completion status of the operation. 
+ * \return VdpStatus The completion status of the operation.
  */
 typedef VdpStatus VdpGetProcAddress(
     VdpDevice device,
