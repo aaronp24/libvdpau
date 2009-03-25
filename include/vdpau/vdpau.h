@@ -268,7 +268,7 @@
  * // This would need to be more complex if
  * // VdpVideoMixerRender were to be provided with more
  * // than one field/frame at a time.
- * thread_1() {
+ * thread_2() {
  *     for (;;) {
  *         // Possibly, other rendering operations to mixer
  *         // layer surfaces here.
