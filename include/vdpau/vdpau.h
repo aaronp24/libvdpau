@@ -6,7 +6,7 @@
 /*
  * This copyright notice applies to this header file:
  *
- * Copyright (c) 2008 NVIDIA Corporation
+ * Copyright (c) 2008-2009 NVIDIA Corporation
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -2358,6 +2358,26 @@ typedef uint32_t VdpDecoderProfile;
 #define VDP_DECODER_PROFILE_VC1_MAIN                    (VdpDecoderProfile)10
 /** \hideinitializer */
 #define VDP_DECODER_PROFILE_VC1_ADVANCED                (VdpDecoderProfile)11
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_MPEG4_PART2_SP              (VdpDecoderProfile)12
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_MPEG4_PART2_ASP             (VdpDecoderProfile)13
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_DIVX4_QMOBILE               (VdpDecoderProfile)14
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_DIVX4_MOBILE                (VdpDecoderProfile)15
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_DIVX4_HOME_THEATER          (VdpDecoderProfile)16
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_DIVX4_HD_1080P              (VdpDecoderProfile)17
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_DIVX5_QMOBILE               (VdpDecoderProfile)18
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_DIVX5_MOBILE                (VdpDecoderProfile)19
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_DIVX5_HOME_THEATER          (VdpDecoderProfile)20
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_DIVX5_HD_1080P              (VdpDecoderProfile)21
 
 /** \hideinitializer */
 #define VDP_DECODER_LEVEL_MPEG1_NA 0
@@ -2426,6 +2446,31 @@ typedef uint32_t VdpDecoderProfile;
 #define VDP_DECODER_LEVEL_VC1_ADVANCED_L3 3
 /** \hideinitializer */
 #define VDP_DECODER_LEVEL_VC1_ADVANCED_L4 4
+
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_SP_L0 0
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_SP_L1 1
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_SP_L2 2
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_SP_L3 3
+
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_ASP_L0 0
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_ASP_L1 1
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_ASP_L2 2
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_ASP_L3 3
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_ASP_L4 4
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_MPEG4_PART2_ASP_L5 5
+
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_DIVX_NA 0
 
 /**
  * \brief Query the implementation's VdpDecoder capabilities.
@@ -2824,6 +2869,75 @@ typedef struct {
 } VdpPictureInfoVC1;
 
 /**
+ * \brief Picture parameter information for an MPEG-4 Part 2 picture.
+ *
+ * Note: References to "copy of bitstream field" in the field descriptions
+ * may refer to data literally parsed from the bitstream, or derived from
+ * the bitstream using a mechanism described in the specification.
+ */
+typedef struct {
+    /**
+     * Reference used by B and P frames.
+     * Set to VDP_INVALID_HANDLE when not used.
+     */
+    VdpVideoSurface forward_reference;
+    /**
+     * Reference used by B frames.
+     * Set to VDP_INVALID_HANDLE when not used.
+     */
+    VdpVideoSurface backward_reference;
+
+    /** Copy of the bitstream field. */
+    int32_t trd[2];
+    /** Copy of the bitstream field. */
+    int32_t trb[2];
+    /** Copy of the bitstream field. */
+    uint16_t vop_time_increment_resolution;
+    /** Copy of the bitstream field. */
+    uint8_t vop_coding_type;
+    /** Copy of the bitstream field. */
+    uint8_t vop_fcode_forward;
+    /** Copy of the bitstream field. */
+    uint8_t vop_fcode_backward;
+    /** Copy of the bitstream field. */
+    uint8_t resync_marker_disable;
+    /** Copy of the bitstream field. */
+    uint8_t interlaced;
+    /** Copy of the bitstream field. */
+    uint8_t quant_type;
+    /** Copy of the bitstream field. */
+    uint8_t quarter_sample;
+    /** Copy of the bitstream field. */
+    uint8_t short_video_header;
+    /** Derived from vop_rounding_type bitstream field. */
+    uint8_t rounding_control;
+    /** Copy of the bitstream field. */
+    uint8_t alternate_vertical_scan_flag;
+    /** Copy of the bitstream field. */
+    uint8_t top_field_first;
+    /** Copy of the bitstream field. */
+    uint8_t intra_quantizer_matrix[64];
+    /** Copy of the bitstream field. */
+    uint8_t non_intra_quantizer_matrix[64];
+} VdpPictureInfoMPEG4Part2;
+
+/**
+ * \brief Picture parameter information for a DivX 4 picture.
+ *
+ * Due to similarites between MPEG-4 Part 2 and DivX 4, the picture
+ * parameter structure is re-used.
+ */
+typedef VdpPictureInfoMPEG4Part2 VdpPictureInfoDivX4;
+
+/**
+ * \brief Picture parameter information for a DivX 5 picture.
+ *
+ * Due to similarites between MPEG-4 Part 2 and DivX 5, the picture
+ * parameter structure is re-used.
+ */
+typedef VdpPictureInfoMPEG4Part2 VdpPictureInfoDivX5;
+
+/**
  * \brief Decode a compressed field/frame and render the result
  *        into a \ref VdpVideoSurface "VdpVideoSurface".
  * \param[in] decoder The decoder object that will perform the
@@ -2993,6 +3107,36 @@ typedef uint32_t VdpVideoMixerFeature;
  * keying is performed after scaling and de-interlacing.
  */
 #define VDP_VIDEO_MIXER_FEATURE_LUMA_KEY                     (VdpVideoMixerFeature)5
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * A VDPAU implementation may support multiple scaling algorithms of
+ * differing quality, and may potentially support a different subset
+ * of algorithms on different hardware.
+ *
+ * In some cases, higher quality algorithms may require more resources
+ * (memory size, memory bandwidth, etc.) to operate. Hence, these high
+ * quality algorithms must be explicitly requested and enabled by the client
+ * application. This allows applications operating in a resource-constrained
+ * environment to have some level of control over resource usage.
+ *
+ * Basic scaling is always built into any video mixer, and is known as
+ * level 0. Scaling quality increases beginning with optional level 1,
+ * through optional level 9.
+ *
+ * If an application requests and enables multiple high quality scaling
+ * algorithms, the highest level enabled scaling algorithm will be used.
+ */
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1      (VdpVideoMixerFeature)11
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L2      (VdpVideoMixerFeature)12
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L3      (VdpVideoMixerFeature)13
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L4      (VdpVideoMixerFeature)14
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L5      (VdpVideoMixerFeature)15
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L6      (VdpVideoMixerFeature)16
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L7      (VdpVideoMixerFeature)17
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L8      (VdpVideoMixerFeature)18
+#define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L9      (VdpVideoMixerFeature)19
 
 /**
  * \brief A VdpVideoMixer creation parameter.

@@ -444,6 +444,62 @@ static void _vdp_cap_dump_picture_info(
             );
         }
         break;
+    case VDP_DECODER_PROFILE_MPEG4_PART2_SP:
+    case VDP_DECODER_PROFILE_MPEG4_PART2_ASP:
+    case VDP_DECODER_PROFILE_DIVX4_QMOBILE:
+    case VDP_DECODER_PROFILE_DIVX4_MOBILE:
+    case VDP_DECODER_PROFILE_DIVX4_HOME_THEATER:
+    case VDP_DECODER_PROFILE_DIVX4_HD_1080P:
+    case VDP_DECODER_PROFILE_DIVX5_QMOBILE:
+    case VDP_DECODER_PROFILE_DIVX5_MOBILE:
+    case VDP_DECODER_PROFILE_DIVX5_HOME_THEATER:
+    case VDP_DECODER_PROFILE_DIVX5_HD_1080P:
+        {
+            VdpPictureInfoMPEG4Part2 const * picture_info_mpeg4 =
+                (VdpPictureInfoMPEG4Part2 const *)picture_info;
+
+            fprintf(
+                _vdp_cap_data.fp,
+                "{%u, %u, {%d, %d}, {%d, %d}, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, {",
+                picture_info_mpeg4->forward_reference,
+                picture_info_mpeg4->backward_reference,
+                (int32_t)picture_info_mpeg4->trd[0],
+                (int32_t)picture_info_mpeg4->trd[1],
+                (int32_t)picture_info_mpeg4->trb[0],
+                (int32_t)picture_info_mpeg4->trb[1],
+                (uint32_t)picture_info_mpeg4->vop_time_increment_resolution,
+                (uint32_t)picture_info_mpeg4->vop_coding_type, 
+                (uint32_t)picture_info_mpeg4->vop_fcode_forward,
+                (uint32_t)picture_info_mpeg4->vop_fcode_backward,
+                (uint32_t)picture_info_mpeg4->resync_marker_disable,
+                (uint32_t)picture_info_mpeg4->interlaced, 
+                (uint32_t)picture_info_mpeg4->quant_type,   
+                (uint32_t)picture_info_mpeg4->quarter_sample, 
+                (uint32_t)picture_info_mpeg4->short_video_header, 
+                (uint32_t)picture_info_mpeg4->rounding_control,
+                (uint32_t)picture_info_mpeg4->alternate_vertical_scan_flag, 
+                (uint32_t)picture_info_mpeg4->top_field_first
+            );
+            for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_mpeg4->intra_quantizer_matrix); ++i) {
+                fprintf(
+                    _vdp_cap_data.fp,
+                    "%s%u",
+                    (i == 0) ? "" : ", ",
+                    (uint32_t)picture_info_mpeg4->intra_quantizer_matrix[i]
+                );
+            }
+            fputs("}, {", _vdp_cap_data.fp);
+            for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_mpeg4->non_intra_quantizer_matrix); ++i) {
+                fprintf(
+                    _vdp_cap_data.fp,
+                    "%s%u",
+                    (i == 0) ? "" : ", ",
+                    (uint32_t)picture_info_mpeg4->non_intra_quantizer_matrix[i]
+                );
+            }
+            fputs("}}", _vdp_cap_data.fp);
+        }
+        break;
     default:
         fputs("{...}", _vdp_cap_data.fp);
         break;
