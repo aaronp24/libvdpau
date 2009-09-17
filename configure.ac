@@ -26,6 +26,8 @@ AC_CHECK_FUNC([dlopen], [],
         AC_CHECK_LIB([dl], [dlopen], DLOPEN_LIBS="-ldl"))
 AC_SUBST([DLOPEN_LIBS])
 
+XORG_CHANGELOG
+
 AC_OUTPUT([Makefile
            src/Makefile
            trace/Makefile
