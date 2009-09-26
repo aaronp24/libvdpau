@@ -26,9 +26,35 @@ AC_CHECK_FUNC([dlopen], [],
         AC_CHECK_LIB([dl], [dlopen], DLOPEN_LIBS="-ldl"))
 AC_SUBST([DLOPEN_LIBS])
 
+# Check for Doxygen.
+AC_ARG_ENABLE(documentation, AS_HELP_STRING([--disable-documentation], [Disable Doxygen documentation (default: auto)]), [DOCS=$enableval], [DOCS=auto])
+if test "x$DOCS" != xno; then
+    AC_CHECK_TOOL([DOXYGEN], [doxygen], [no])
+    AC_CHECK_TOOL([DOT], [dot], [no])
+    AC_CHECK_TOOL([PDFTEX], [pdftex], [no])
+else
+    DOXYGEN=no
+    DOT=no
+    PDFTEX=no
+fi
+if test "x$DOCS" = xyes; then
+    if test "x$DOXYGEN" = xno; then
+        AC_ERROR([Documentation enabled but doxygen was not found in your path])
+    fi
+    if test "x$DOT" = xno; then
+        AC_ERROR([Documentation enabled but dot was not found in your path.  Please install graphviz])
+    fi
+    if test "x$PDFTEX" = xno; then
+        AC_ERROR([Documentation enabled but pdftex was not found in your path])
+    fi
+fi
+AM_CONDITIONAL([ENABLE_DOCS], [test "x$DOXYGEN" != xno -a "x$DOT" != xno -a "x$PDFTEX" != xno])
+AC_SUBST(DOXYGEN)
+
 XORG_CHANGELOG
 
 AC_OUTPUT([Makefile
+           doc/Makefile
            src/Makefile
            trace/Makefile
            vdpau.pc])
