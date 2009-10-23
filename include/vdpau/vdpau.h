@@ -1501,6 +1501,37 @@ typedef uint32_t VdpVideoSurface;
  * creation. Applications are expected to initialize any region
  * that they use, via \ref VdpDecoderRender or \ref
  * VdpVideoSurfacePutBitsYCbCr.
+ *
+ * Note that certain widths/heights are impossible for specific values of
+ * chroma_type. For example, the definition of VDP_CHROMA_TYPE_420 implies
+ * that the width must be even, since each single chroma sample covers two
+ * luma samples horizontally. A similar argument applies to surface heights,
+ * although doubly so, since interlaced pictures must be supported; each
+ * field's height must itself be a multiple of 2. Hence the overall surface's
+ * height must be a multiple of 4.
+ *
+ * Similar rules apply to other chroma_type values.
+ *
+ * Implementations may also impose additional restrictions on the surface
+ * sizes they support, potentially requiring additional rounding of actual
+ * surface sizes.
+ *
+ * In most cases, this is not an issue, since:
+ * - Video streams are encoded as an array of macro-blocks, which typically
+ *   have larger size alignment requirements than video surfaces do.
+ * - APIs such as \ref VdpVideoMixerRender allow specification of a sub-region
+ *   of the surface to read, which allows the padding data to be clipped away.
+ *
+ * However, other APIs such as \ref VdpVideoSurfaceGetBitsYCbCr and
+ * \ref VdpVideoSurfacePutBitsYCbCr do not allow a sub-region to be specified,
+ * and always operate on surface size that was actually allocated, rather
+ * than the surface size that was requested. In this case, applications need
+ * to be aware of the actual surface size, in order to allocate appropriately
+ * sized buffers for the get-/put-bits operations.
+ *
+ * For this reason, applications may need to call
+ * \ref VdpVideoSurfaceGetParameters after creation, in order to retrieve the
+ * actual surface size.
  */
 typedef VdpStatus VdpVideoSurfaceCreate(
     VdpDevice         device,
@@ -2164,7 +2195,7 @@ typedef struct {
  *       \ref VdpDevice "VdpDevice".
  * \param[in] source_rect The sub-rectangle of the source
  *       surface to read from. If NULL, the entire
- *       source_surface will be read. Left/right ot top/bottom
+ *       source_surface will be read. Left/right and/or top/bottom
  *       co-ordinates may be swapped to flip the source. Any
  *       flip occurs prior to any requested rotation. Values
  *       from outside the source surface are valid and samples
@@ -2209,7 +2240,7 @@ typedef struct {
  * -# Extract source_rect from source_surface.
  *
  * -# The extracted source is rotated 0, 90, 180 or 270 degrees
- *   according to the flags.
+ *    according to the flags.
  *
  * -# The rotated source is component-wise multiplied by a
  *    smooth-shaded quad with a (potentially) different color at
@@ -3129,13 +3160,61 @@ typedef uint32_t VdpVideoMixerFeature;
  * algorithms, the highest level enabled scaling algorithm will be used.
  */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1      (VdpVideoMixerFeature)11
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * See \ref VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 for details.
+ */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L2      (VdpVideoMixerFeature)12
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * See \ref VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 for details.
+ */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L3      (VdpVideoMixerFeature)13
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * See \ref VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 for details.
+ */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L4      (VdpVideoMixerFeature)14
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * See \ref VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 for details.
+ */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L5      (VdpVideoMixerFeature)15
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * See \ref VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 for details.
+ */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L6      (VdpVideoMixerFeature)16
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * See \ref VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 for details.
+ */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L7      (VdpVideoMixerFeature)17
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * See \ref VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 for details.
+ */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L8      (VdpVideoMixerFeature)18
+/**
+ * \hideinitializer
+ * \brief A VdpVideoMixerFeature.
+ *
+ * See \ref VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L1 for details.
+ */
 #define VDP_VIDEO_MIXER_FEATURE_HIGH_QUALITY_SCALING_L9      (VdpVideoMixerFeature)19
 
 /**
@@ -3675,7 +3754,10 @@ typedef struct {
  *       VDP_INVALID_HANDLE.
  * \param[in] video_source_rect The sub-rectangle of the source
  *       video surface to extract and process. If NULL, the
- *       entire surface will be used.
+ *       entire surface will be used. Left/right and/or top/bottom
+ *       co-ordinates may be swapped to flip the source. Values
+ *       from outside the video surface are valid and samples
+ *       at those locations will be taken from the nearest edge.
  * \param[in] destination_surface
  * \param[in] destination_rect The sub-rectangle of the
  *       destination surface to modify. Note that rectangle clips
