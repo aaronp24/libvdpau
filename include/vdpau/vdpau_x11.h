@@ -6,7 +6,7 @@
 /*
  * This copyright notice applies to this header file:
  *
- * Copyright (c) 2008 NVIDIA Corporation
+ * Copyright (c) 2008-2009 NVIDIA Corporation
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -72,13 +72,15 @@ extern "C" {
  *   standard system (possibly X11-specific) library path.
  *   - \c libvdpau.so.1 (runtime)
  *   - \c libvdpau.so (development)
- * - Back-end driver files. These files are located in the
- *   standard system (possibly X11-specific) library path.
- *   - \c libvdpau_\%s.so
+ * - Back-end driver files. These files are located in a
+ *   system-defined library path, which is configurable at compile
+ *   time but is typically /usr/lib/vdpau.  Use `pkg-config
+ *   --variable=moduledir vdpau` to locate the driver install path.
+ *   - \c $moduledir/libvdpau_\%s.so.1
  *   For example:
- *   - \c libvdpau_nvidia.so
- *   - \c libvdpau_intel.so
- *   - \c libvdpau_ati.so
+ *   - \c /usr/lib/vdpau/libvdpau_nvidia.so.1
+ *   - \c /usr/lib/vdpau/libvdpau_intel.so.1
+ *   - \c /usr/lib/vdpau/libvdpau_ati.so.1
  *
  * The VDPAU wrapper library implements just one function; \ref
  * vdp_device_create_x11. The wrapper will implement this function

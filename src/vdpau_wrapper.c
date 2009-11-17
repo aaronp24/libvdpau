@@ -22,6 +22,7 @@
  */
 
 #include <dlfcn.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -46,7 +47,7 @@ static void _vdp_wrapper_error_breakpoint(char const * file, int line, char cons
 
 #endif
 
-#define DRIVER_LIB_FORMAT "libvdpau_%s.so"
+#define DRIVER_LIB_FORMAT "%slibvdpau_%s.so%s"
 
 VdpStatus vdp_device_create_x11(
     Display *             display,
@@ -57,7 +58,7 @@ VdpStatus vdp_device_create_x11(
 )
 {
     char const * vdpau_driver;
-    char *       vdpau_driver_lib;
+    char         vdpau_driver_lib[PATH_MAX];
     void *       backend_dll;
     char const * vdpau_trace;
     char const * func_name;
@@ -70,15 +71,23 @@ VdpStatus vdp_device_create_x11(
         vdpau_driver = "nvidia";
     }
 
-    vdpau_driver_lib = malloc(strlen(DRIVER_LIB_FORMAT) + strlen(vdpau_driver) + 1);
-    if (!vdpau_driver_lib) {
+    if (snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib), DRIVER_LIB_FORMAT,
+                 VDPAU_MODULEDIR "/", vdpau_driver, ".1") >=
+            sizeof(vdpau_driver_lib)) {
+        fprintf(stderr, "Failed to construct driver path: path too long\n");
         _VDP_ERROR_BREAKPOINT();
-        return VDP_STATUS_RESOURCES;
+        return VDP_STATUS_NO_IMPLEMENTATION;
     }
-    sprintf(vdpau_driver_lib, DRIVER_LIB_FORMAT, vdpau_driver);
 
     backend_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
-    free(vdpau_driver_lib);
+    if (!backend_dll) {
+        /* Try again using the old path, which is guaranteed to fit in PATH_MAX
+         * if the complete path fit above. */
+        snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib), DRIVER_LIB_FORMAT,
+                 "", vdpau_driver, "");
+        backend_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
+    }
+
     if (!backend_dll) {
         fprintf(stderr, "Failed to open VDPAU backend %s\n", dlerror());
         _VDP_ERROR_BREAKPOINT();
@@ -90,7 +99,7 @@ VdpStatus vdp_device_create_x11(
         void *         trace_dll;
         SetDllHandle * set_dll_handle;
 
-        trace_dll = dlopen("libvdpau_trace.so", RTLD_NOW | RTLD_GLOBAL);
+        trace_dll = dlopen(VDPAU_MODULEDIR "/libvdpau_trace.so.1", RTLD_NOW | RTLD_GLOBAL);
         if (!trace_dll) {
             fprintf(stderr, "Failed to open VDPAU trace library %s\n", dlerror());
             _VDP_ERROR_BREAKPOINT();
@@ -134,4 +143,3 @@ VdpStatus vdp_device_create_x11(
         get_proc_address
     );
 }
-

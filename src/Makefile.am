@@ -1,5 +1,6 @@
 AM_CFLAGS = \
     -I$(top_srcdir)/include \
+    -DVDPAU_MODULEDIR="\"$(moduledir)\"" \
     $(X11_CFLAGS)
 
 lib_LTLIBRARIES = libvdpau.la

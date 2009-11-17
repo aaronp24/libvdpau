@@ -51,6 +51,14 @@ fi
 AM_CONDITIONAL([ENABLE_DOCS], [test "x$DOXYGEN" != xno -a "x$DOT" != xno -a "x$PDFTEX" != xno])
 AC_SUBST(DOXYGEN)
 
+# Options
+AC_ARG_WITH(module-dir,
+            AC_HELP_STRING([--with-module-dir=DIR],
+                           [Default module directory [[default=LIBDIR/vdpau]]]),
+            [moduledir="$withval"],
+            [moduledir="$libdir/vdpau"])
+AC_SUBST(moduledir)
+
 XORG_CHANGELOG
 
 AC_OUTPUT([Makefile
