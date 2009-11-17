@@ -1233,13 +1233,34 @@ typedef char const * VdpGetErrorString(
  */
 
 /**
+ * \brief The VDPAU interface version described by this header file.
+ *
+ * This version will only increase if a major incompatible change is made.
+ * For example, if the parameters passed to an existing function are modified,
+ * rather than simply adding new functions/enumerations), or if the mechanism
+ * used to load the backend driver is modified incompatibly. Such changes are
+ * unlikely.
+ *
+ * This value also represents the DSO version of VDPAU-related
+ * shared-libraries.
+ *
+ * VDPAU version numbers are simple integers that increase monotonically
+ * (typically by value 1).
+ */
+#define VDPAU_INTERFACE_VERSION 1
+
+/**
  * \brief The VDPAU version described by this header file.
  *
- * Note that VDPAU version numbers are simple integers that
- * increase monotonically (typically by value 1) with each VDPAU
- * header revision.
+ * This version will increase whenever any non-documentation change is made to
+ * vdpau.h, or related header files such as vdpau_x11.h. Such changes
+ * typically involve the addition of new functions, constants, or features.
+ * Such changes are expected to be completely backwards-compatible.
+ *
+ * VDPAU version numbers are simple integers that increase monotonically
+ * (typically by value 1).
  */
-#define VDPAU_VERSION 0
+#define VDPAU_VERSION 1
 
 /**
  * \brief Retrieve the VDPAU version implemented by the backend.
