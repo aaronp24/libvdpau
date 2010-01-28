@@ -828,7 +828,7 @@ typedef uint32_t VdpYCbCrFormat;
  * \hideinitializer
  * \brief The "YV12" YCbCr surface format.
  *
- * This format has a three planes, a Y plane, a U plane, and a V
+ * This format has a three planes, a Y plane, a V plane, and a U
  * plane.
  *
  * Each of the planes is an array of byte-sized components.
