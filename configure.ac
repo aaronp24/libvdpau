@@ -1,6 +1,6 @@
 AC_PREREQ(2.60)
 
-AC_INIT(libvdpau, 0.3, [xorg@lists.freedesktop.org], libvdpau)
+AC_INIT(libvdpau, 0.4, [xorg@lists.freedesktop.org], libvdpau)
 AM_INIT_AUTOMAKE([dist-bzip2 foreign])
 AM_MAINTAINER_MODE
 
