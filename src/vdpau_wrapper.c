@@ -21,12 +21,20 @@
  * SOFTWARE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <dlfcn.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <vdpau/vdpau_x11.h>
+#if DRI2
+#include "mesa_dri2.h"
+#include <X11/Xlib.h>
+#endif
 
 typedef void SetDllHandle(
     void * driver_dll_handle
@@ -49,6 +57,36 @@ static void _vdp_wrapper_error_breakpoint(char const * file, int line, char cons
 
 #define DRIVER_LIB_FORMAT "%slibvdpau_%s.so%s"
 
+static char * _vdp_get_driver_name_from_dri2(
+    Display *             display,
+    int                   screen
+)
+{
+    char * driver_name = NULL;
+#if DRI2
+    Window root = RootWindow(display, screen);
+    int event_base, error_base;
+    int major, minor;
+    char * device_name;
+
+    if (!_vdp_DRI2QueryExtension(display, &event_base, &error_base)) {
+        return NULL;
+    }
+
+    if (!_vdp_DRI2QueryVersion(display, &major, &minor) ||
+            (major < 1 || (major == 1 && minor < 2))) {
+        return NULL;
+    }
+
+    if (!_vdp_DRI2Connect(display, root, &driver_name, &device_name)) {
+        return NULL;
+    }
+
+    XFree(device_name);
+#endif /* DRI2 */
+    return driver_name;
+}
+
 VdpStatus vdp_device_create_x11(
     Display *             display,
     int                   screen,
@@ -58,6 +96,7 @@ VdpStatus vdp_device_create_x11(
 )
 {
     char const * vdpau_driver;
+    char * vdpau_driver_dri2 = NULL;
     char         vdpau_driver_lib[PATH_MAX];
     void *       backend_dll;
     char const * vdpau_trace;
@@ -65,8 +104,11 @@ VdpStatus vdp_device_create_x11(
 
     VdpDeviceCreateX11 * vdp_imp_device_create_x11;
 
-    /* FIXME: Determine driver name using an X extension */
     vdpau_driver = getenv("VDPAU_DRIVER");
+    if (!vdpau_driver) {
+        vdpau_driver = vdpau_driver_dri2 =
+            _vdp_get_driver_name_from_dri2(display, screen);
+    }
     if (!vdpau_driver) {
         vdpau_driver = "nvidia";
     }
@@ -75,6 +117,10 @@ VdpStatus vdp_device_create_x11(
                  VDPAU_MODULEDIR "/", vdpau_driver, ".1") >=
             sizeof(vdpau_driver_lib)) {
         fprintf(stderr, "Failed to construct driver path: path too long\n");
+        if (vdpau_driver_dri2) {
+            XFree(vdpau_driver_dri2);
+            vdpau_driver_dri2 = NULL;
+        }
         _VDP_ERROR_BREAKPOINT();
         return VDP_STATUS_NO_IMPLEMENTATION;
     }
@@ -86,6 +132,11 @@ VdpStatus vdp_device_create_x11(
         snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib), DRIVER_LIB_FORMAT,
                  "", vdpau_driver, "");
         backend_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
+    }
+
+    if (vdpau_driver_dri2) {
+        XFree(vdpau_driver_dri2);
+        vdpau_driver_dri2 = NULL;
     }
 
     if (!backend_dll) {
