@@ -2144,6 +2144,22 @@ typedef enum {
 
 /**
  * \brief Complete blending operation definition.
+ *
+ * A "blend state" operation controls the math behind certain rendering
+ * operations.
+ *
+ * The blend math is the familiar OpenGL blend math:
+ *     \f[
+ *     dst.a = equation(blendFactorDstAlpha*dst.a,
+ *     blendFactorSrcAlpha*src.a);
+ *     \f]
+ *     \f[
+ *     dst.rgb = equation(blendFactorDstColor*dst.rgb,
+ *     blendFactorSrcColor*src.rgb);
+ *     \f]
+ *
+ * Note that when equation is MIN or MAX, the blend factors and constants
+ * are ignored, and are treated as if they were 1.0.
  */
 typedef struct {
     /**
@@ -2237,16 +2253,9 @@ typedef struct {
  *     blend state will be used for the composite operation. If
  *     NULL, blending is effectively disabled, which is
  *     equivalent to a blend equation of ADD, source blend
- *     factors of ONE and destination blend factors of ZERO. The
- *     blend math is the familiar OpenGL blend math:
- *     \f[
- *     dst.a = equation(blendFactorDstAlpha*dst.a,
- *     blendFactorSrcAlpha*src.a);
- *     \f]
- *     \f[
- *     dst.rgb = equation(blendFactorDstColor*dst.rgb,
- *     blendFactorSrcColor*src.rgb);
- *     \f]
+ *     factors of ONE and destination blend factors of ZERO.
+ *     See \ref VdpOutputSurfaceRenderBlendState for details
+ *     regarding the mathematics of the blending operation.
  * \param[in] flags A set of flags influencing how the
  *       compositing operation works.
  * \arg \ref VDP_OUTPUT_SURFACE_RENDER_ROTATE_0
@@ -2324,16 +2333,9 @@ typedef VdpStatus VdpOutputSurfaceRenderOutputSurface(
  *     blend state will be used for the composite operation. If
  *     NULL, blending is effectively disabled, which is
  *     equivalent to a blend equation of ADD, source blend
- *     factors of ONE and destination blend factors of ZERO. The
- *     blend math is the familiar OpenGL blend math:
- *     \f[
- *     dst.a = equation(blendFactorDstAlpha*dst.a,
- *     blendFactorSrcAlpha*src.a);
- *     \f]
- *     \f[
- *     dst.rgb = equation(blendFactorDstColor*dst.rgb,
- *     blendFactorSrcColor*src.rgb);
- *     \f]
+ *     factors of ONE and destination blend factors of ZERO.
+ *     See \ref VdpOutputSurfaceRenderBlendState for details
+ *     regarding the mathematics of the blending operation.
  * \param[in] flags A set of flags influencing how the
  *       compositing operation works.
  * \arg \ref VDP_OUTPUT_SURFACE_RENDER_ROTATE_0
@@ -3990,6 +3992,14 @@ typedef VdpStatus VdpPresentationQueueGetTime(
  * Using this technique, an application's response to window resizing may
  * simply be to render to, and display, a different region of the surface,
  * rather than de-/re-allocation of surfaces to match the updated window size.
+ *
+ * Implementations may impose an upper bound on the number of entries
+ * contained by the presentation queue at a given time. This limit is likely
+ * different to the number of \ref VdpOutputSurface "VdpOutputSurface"s that
+ * may be allocated at a given time. This limit applies to entries in the
+ * QUEUED or VISIBLE state only. In other words, entries that have
+ * transitioned from a QUEUED or VISIBLE state to an IDLE state do not count
+ * toward this limit.
  */
 typedef VdpStatus VdpPresentationQueueDisplay(
     VdpPresentationQueue presentation_queue,
@@ -4008,10 +4018,11 @@ typedef VdpStatus VdpPresentationQueueDisplay(
  *       that 0 means the surface was never displayed.
  * \return VdpStatus The completion status of the operation.
  *
- * Note that this API will block indefinitely if queried about
- * the surface most recently added to a presentation queue,
- * since there is no other surface that could possibly replace
- * the queried surface.
+ * Note that this API would block forever if queried about the surface most
+ * recently added to a presentation queue. That is because there would be no
+ * other surface that could possibly replace that surface as the currently
+ * displayed surface, and hence that surface would never become idle. For
+ * that reason, this function will return an error in that case.
  */
 typedef VdpStatus VdpPresentationQueueBlockUntilSurfaceIdle(
     VdpPresentationQueue presentation_queue,
