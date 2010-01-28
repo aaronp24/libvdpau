@@ -397,7 +397,7 @@ static void _vdp_cap_dump_picture_info(
                     (uint32_t)rf->frame_idx
                 );
             }
-            fputs("}", _vdp_cap_data.fp);
+            fputs("}}", _vdp_cap_data.fp);
         }
         break;
     case VDP_DECODER_PROFILE_VC1_SIMPLE:
