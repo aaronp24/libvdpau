@@ -6,7 +6,7 @@
 /*
  * This copyright notice applies to this header file:
  *
- * Copyright (c) 2008-2009 NVIDIA Corporation
+ * Copyright (c) 2008-2010 NVIDIA Corporation
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -615,13 +615,13 @@
  * decoded field rate. This mode of operation is thus referred to as
  * "half-rate".
  *
- * Implementations may choose whether to support half-rate de-interlacing mode
- * or not. Regular de-interlacing mode should be supported to any supported
- * advanced de-interlacing algorithm.
+ * Implementations may choose whether to support half-rate de-interlacing
+ * or not. Regular full-rate de-interlacing should be supported by any
+ * supported advanced de-interlacing algorithm.
  *
  * The descriptions of de-interlacing algorithms above assume that regular
  * (not half-rate) operation is being performed, when detailing the number of
-  "half-rate" de-interlacing is used.deoMixerRender calls.
+ * VdpVideoMixerRender calls.
  *
  * Recall that the concatenation of past/current/future surface lists simply
  * forms a window into the stream of decoded fields. To achieve standard
