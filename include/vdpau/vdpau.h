@@ -372,12 +372,12 @@
  * The exact data that should be passed to VDPAU is detailed below for each
  * supported format:
  *
- * \subsection MPEG-1 and MPEG-2
+ * \subsection bitstream_mpeg1_mpeg2 MPEG-1 and MPEG-2
  *
  * Include all slices beginning with start codes 0x00000101 through
  * 0x000001AF. The slice start code must be included for all slices.
  *
- * \subsection H.264
+ * \subsection bitstream_h264 H.264
  *
  * Include all NALs with nal_unit_type of 1 or 5 (coded slice of non-IDR/IDR
  * picture respectively). The complete slice start code (including 0x000001
@@ -391,7 +391,7 @@
  * - Multiple bitstream buffer array entries (e.g. one per slice) may point at
  *   the same physical data storage for the slice start code prefix.
  *
- * \subsection VC-1 Simple and Main Profile
+ * \subsection bitstream_vc1_sp_mp VC-1 Simple and Main Profile
  *
  * VC-1 simple/main profile bitstreams always consist of a single slice per
  * picture, and do not use start codes to delimit pictures. Instead, the
@@ -405,7 +405,7 @@
  * this header information explicitly must not be included in the bitstream
  * data passed to VDPAU for this encoding format.
  *
- * \subsection VC-1 Advanced Profile
+ * \subsection bitstream_vc1_ap VC-1 Advanced Profile
  *
  * Include all slices beginning with start codes 0x0000010D (frame),
  * 0x0000010C (field) or 0x0000010B (slice). The slice start code should be
@@ -426,6 +426,11 @@
  * The bitstream passed to VDPAU should contain all original emulation
  * prevention bytes present in the original bitstream; do not remove these
  * from the bitstream.
+ *
+ * \subsection bitstream_mpeg4part2 MPEG-4 Part 2 and DivX
+ *
+ * Include all slices beginning with start codes 0x000001B6. The slice start
+ * code must be included for all slices.
  *
  * \section video_mixer_usage Video Mixer Usage
  *

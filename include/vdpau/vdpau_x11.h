@@ -34,8 +34,8 @@
  * \file vdpau_x11.h
  * \brief X11 Window System Integration Layer
  *
- * This file contains the \ref api_winsys_x11 "X11 Window System
- * Integration Layer".
+ * This file contains the \ref api_winsys_x11 X11 Window System
+ * Integration Layer.
  */
 
 #ifndef _VDPAU_X11_H
