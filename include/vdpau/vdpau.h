@@ -474,7 +474,7 @@
  * determining the minimum required number of surfaces for optimal operation,
  * and the maximum number of useful surfaces, beyond which surfaces are not
  * used. It is recommended that in all cases other than plain bob/weave, at
- * least 2 past and 1 future frame be provided.
+ * least 2 past and 1 future field be provided.
  *
  * Note that it is entirely possible, in general, for any of the
  * \ref VdpVideoMixer "VdpVideoMixer" post-processing steps other than
