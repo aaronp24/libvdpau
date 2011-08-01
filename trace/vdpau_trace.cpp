@@ -4608,11 +4608,9 @@ VdpStatus vdp_trace_device_create_x11(
     if (_vdp_cap_data.level >= LEVEL_PARAMS) {
         fprintf(
             _vdp_cap_data.fp,
-            "%p, %d, %s, %s",
+            "%p, %d, -, -",
             display,
-            screen,
-            device ? "-" : "NULL",
-            get_proc_address ? "-" : "NULL"
+            screen
         );
     }
     fputs(")\n", _vdp_cap_data.fp);
