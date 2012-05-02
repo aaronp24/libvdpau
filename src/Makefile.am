@@ -1,6 +1,7 @@
 AM_CFLAGS = \
     -I$(top_srcdir)/include \
     -DVDPAU_MODULEDIR="\"$(moduledir)\"" \
+    -DVDPAU_SYSCONFDIR="\"$(sysconfdir)\"" \
     $(X11_CFLAGS) \
     $(XEXT_CFLAGS)
 
@@ -26,3 +27,6 @@ libvdpauincludedir = $(includedir)/vdpau
 libvdpauinclude_HEADERS = \
     $(top_srcdir)/include/vdpau/vdpau.h \
     $(top_srcdir)/include/vdpau/vdpau_x11.h
+
+libvdpausysconfdir=$(sysconfdir)
+dist_libvdpausysconf_DATA = vdpau_wrapper.cfg

@@ -210,6 +210,163 @@ static void _vdp_close_driver(void)
     _vdp_imp_device_create_x11_proc = NULL;
 }
 
+static VdpGetProcAddress * _imp_get_proc_address;
+static VdpVideoSurfacePutBitsYCbCr * _imp_vid_put_bits_y_cb_cr;
+static VdpPresentationQueueSetBackgroundColor * _imp_pq_set_bg_color;
+static int _inited_fixes;
+static int _running_under_flash;
+static int _enable_flash_uv_swap = 1;
+static int _disable_flash_pq_bg_color = 1;
+
+static VdpStatus vid_put_bits_y_cb_cr_swapped(
+    VdpVideoSurface      surface,
+    VdpYCbCrFormat       source_ycbcr_format,
+    void const * const * source_data,
+    uint32_t const *     source_pitches
+)
+{
+    void const * data_reordered[3];
+    void const * const * data;
+
+    if (source_ycbcr_format == VDP_YCBCR_FORMAT_YV12) {
+        data_reordered[0] = source_data[0];
+        data_reordered[1] = source_data[2];
+        data_reordered[2] = source_data[1];
+        /*
+         * source_pitches[1] and source_pitches[2] should be equal,
+         * so no need to re-order.
+         */
+        data = data_reordered;
+    }
+    else {
+        data = source_data;
+    }
+
+    return _imp_vid_put_bits_y_cb_cr(
+        surface,
+        source_ycbcr_format,
+        data,
+        source_pitches
+    );
+}
+
+static VdpStatus pq_set_bg_color_noop(
+    VdpPresentationQueue presentation_queue,
+    VdpColor * const     background_color
+)
+{
+    return VDP_STATUS_OK;
+}
+
+static VdpStatus vdp_wrapper_get_proc_address(
+    VdpDevice device,
+    VdpFuncId function_id,
+    /* output parameters follow */
+    void * *  function_pointer
+)
+{
+    VdpStatus status;
+
+    status = _imp_get_proc_address(device, function_id, function_pointer);
+    if (status != VDP_STATUS_OK) {
+        return status;
+    }
+
+    if (_running_under_flash) {
+        switch (function_id) {
+        case VDP_FUNC_ID_VIDEO_SURFACE_PUT_BITS_Y_CB_CR:
+            if (_enable_flash_uv_swap) {
+                _imp_vid_put_bits_y_cb_cr = *function_pointer;
+                *function_pointer = vid_put_bits_y_cb_cr_swapped;
+            }
+            break;
+        case VDP_FUNC_ID_PRESENTATION_QUEUE_SET_BACKGROUND_COLOR:
+            if (_disable_flash_pq_bg_color) {
+                _imp_pq_set_bg_color = *function_pointer;
+                *function_pointer = pq_set_bg_color_noop;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    return VDP_STATUS_OK;
+}
+
+static void init_running_under_flash(void)
+{
+    FILE *fp;
+    char buffer[1024];
+    int ret, i;
+
+    fp = fopen("/proc/self/cmdline", "r");
+    if (!fp) {
+        return;
+    }
+    ret = fread(buffer, 1, sizeof(buffer) - 1, fp);
+    fclose(fp);
+    if (ret < 0) {
+        return;
+    }
+    /*
+     * Sometimes the file contains null between arguments. Wipe these out so
+     * strstr doesn't stop early.
+     */
+    for (i = 0; i < ret; i++) {
+        if (buffer[i] == '\0') {
+            buffer[i] = 'x';
+        }
+    }
+    buffer[ret] = '\0';
+
+    if (strstr(buffer, "libflashplayer") != NULL) {
+        _running_under_flash = 1;
+    }
+}
+
+void init_config(void)
+{
+    FILE *fp;
+    char buffer[1024];
+    int ret;
+
+    fp = fopen(VDPAU_SYSCONFDIR "/vdpau_wrapper.cfg", "r");
+    if (!fp) {
+        return;
+    }
+
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        char * equals = strchr(buffer, '=');
+        char * param;
+
+        if (equals == NULL) {
+            continue;
+        }
+
+        *equals = '\0';
+        param = equals + 1;
+
+        if (!strcmp(buffer, "enable_flash_uv_swap")) {
+            _enable_flash_uv_swap = atoi(param);
+        }
+        else if (!strcmp(buffer, "disable_flash_pq_bg_color")) {
+            _disable_flash_pq_bg_color = atoi(param);
+        }
+    }
+}
+
+void init_fixes(void)
+{
+    if (_inited_fixes) {
+        return;
+    }
+    _inited_fixes = 1;
+
+    init_running_under_flash();
+    init_config();
+}
+
 VdpStatus vdp_device_create_x11(
     Display *             display,
     int                   screen,
@@ -220,6 +377,8 @@ VdpStatus vdp_device_create_x11(
 {
     VdpStatus status;
 
+    init_fixes();
+
     if (!_vdp_imp_device_create_x11_proc) {
         status = _vdp_open_driver(display, screen);
         if (status != VDP_STATUS_OK) {
@@ -228,10 +387,17 @@ VdpStatus vdp_device_create_x11(
         }
     }
 
-    return _vdp_imp_device_create_x11_proc(
+    status = _vdp_imp_device_create_x11_proc(
         display,
         screen,
         device,
-        get_proc_address
+        &_imp_get_proc_address
     );
+    if (status != VDP_STATUS_OK) {
+        return status;
+    }
+
+    *get_proc_address = vdp_wrapper_get_proc_address;
+
+    return VDP_STATUS_OK;
 }
