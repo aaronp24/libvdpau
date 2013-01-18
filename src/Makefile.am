@@ -12,6 +12,8 @@ libvdpau_la_SOURCES = \
     $(DRI2_SOURCES)
 
 if DRI2
+    AM_CFLAGS += \
+        $(dri2proto_CFLAGS)
     DRI2_SOURCES = \
         mesa_dri2.c \
         mesa_dri2.h
