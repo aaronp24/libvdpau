@@ -47,4 +47,7 @@ extern Bool
 _vdp_DRI2Connect(Display * display, XID window, char **driverName,
                  char **deviceName);
 
+extern void
+_vdp_DRI2RemoveExtension(Display * display);
+
 #endif

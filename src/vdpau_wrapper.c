@@ -86,14 +86,17 @@ static char * _vdp_get_driver_name_from_dri2(
 
     if (!_vdp_DRI2QueryVersion(display, &major, &minor) ||
             (major < 1 || (major == 1 && minor < 2))) {
+        _vdp_DRI2RemoveExtension(display);
         return NULL;
     }
 
     if (!_vdp_DRI2Connect(display, root, &driver_name, &device_name)) {
+        _vdp_DRI2RemoveExtension(display);
         return NULL;
     }
 
     XFree(device_name);
+    _vdp_DRI2RemoveExtension(display);
 #endif /* DRI2 */
     return driver_name;
 }
