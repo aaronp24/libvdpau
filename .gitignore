@@ -24,4 +24,5 @@ missing
 *.la
 *.o
 stamp-h1
+test-driver
 vdpau.pc

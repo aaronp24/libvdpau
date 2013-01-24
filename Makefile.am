@@ -1,4 +1,4 @@
-SUBDIRS = doc src trace
+SUBDIRS = doc src test trace
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = vdpau.pc

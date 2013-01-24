@@ -81,5 +81,6 @@ XORG_CHANGELOG
 AC_OUTPUT([Makefile
            doc/Makefile
            src/Makefile
+           test/Makefile
            trace/Makefile
            vdpau.pc])
