@@ -4,7 +4,7 @@ AC_INIT(libvdpau, 0.5, [vdpau@lists.freedesktop.org], libvdpau)
 AM_INIT_AUTOMAKE([dist-bzip2 foreign])
 AM_MAINTAINER_MODE
 
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(config.h)
 
 # Disable static libraries by default.  Use --enable-static if you really want
 # them.
