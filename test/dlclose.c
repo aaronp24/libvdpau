@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <dlfcn.h>
 #include <stdio.h>
 #include <vdpau/vdpau.h>
@@ -8,11 +9,32 @@
 #define FAIL 1
 #define SKIP 77
 
+static int countOpenFDs(void)
+{
+    DIR *dir = opendir("/proc/self/fd");
+    struct dirent *ent;
+    int count = 0;
+
+    if (!dir) {
+        fprintf(stderr, "Couldn't open /proc/self/fd; skipping file descriptor "
+                "leak test\n");
+        return 0;
+    }
+
+    while (ent = readdir(dir)) {
+        count++;
+    }
+
+    closedir(dir);
+    return count;
+}
+
 int main()
 {
     // Work around a bug in libXext: dlclosing it after it has registered the
     // Generic Event Extension causes an identical bug to the one this program
     // is trying to test for.
+    int nOpenFDs = countOpenFDs();
     void *libXext = dlopen("libXext.so.6", RTLD_LAZY);
     void *libvdpau = dlopen("../src/.libs/libvdpau.so", RTLD_LAZY);
     Display *dpy = XOpenDisplay(NULL);
@@ -59,6 +81,12 @@ int main()
 
     dlclose(libvdpau);
     XCloseDisplay(dpy);
+
+    // Make sure no file descriptors were leaked.
+    if (countOpenFDs() != nOpenFDs) {
+        fprintf(stderr, "Mismatch in the number of open file descriptors!\n");
+        return FAIL;
+    }
 
     return PASS;
 }

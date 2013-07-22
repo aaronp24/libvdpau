@@ -356,6 +356,8 @@ void init_config(void)
             _disable_flash_pq_bg_color = atoi(param);
         }
     }
+
+    fclose(fp);
 }
 
 void init_fixes(void)
