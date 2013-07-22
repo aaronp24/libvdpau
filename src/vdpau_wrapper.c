@@ -332,7 +332,6 @@ void init_config(void)
 {
     FILE *fp;
     char buffer[1024];
-    int ret;
 
     fp = fopen(VDPAU_SYSCONFDIR "/vdpau_wrapper.cfg", "r");
     if (!fp) {
