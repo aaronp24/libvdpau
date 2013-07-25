@@ -128,6 +128,20 @@ _vdp_DRI2Connect(Display * dpy, XID window, char **driverName, char **deviceName
    req->dri2ReqType = X_DRI2Connect;
    req->window = window;
    req->driverType = DRI2DriverVDPAU;
+#ifdef DRI2DriverPrimeShift
+   {
+      char *prime = getenv("DRI_PRIME");
+      if (prime) {
+         unsigned int primeid;
+         errno = 0;
+         primeid = strtoul(prime, NULL, 0);
+         if (errno == 0)
+            req->driverType |=
+               ((primeid & DRI2DriverPrimeMask) << DRI2DriverPrimeShift);
+      }
+   }
+#endif
+
    if (!_XReply(dpy, (xReply *) & rep, 0, xFalse)) {
       UnlockDisplay(dpy);
       SyncHandle();
