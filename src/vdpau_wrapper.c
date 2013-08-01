@@ -328,7 +328,7 @@ static void init_running_under_flash(void)
     }
 }
 
-void init_config(void)
+static void init_config(void)
 {
     FILE *fp;
     char buffer[1024];
@@ -360,7 +360,7 @@ void init_config(void)
     fclose(fp);
 }
 
-void init_fixes(void)
+static void init_fixes(void)
 {
     if (_inited_fixes) {
         return;
