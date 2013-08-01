@@ -174,23 +174,6 @@ static void _vdp_cap_dump_color(
     );
 }
 
-static void _vdp_cap_dump_point(
-    VdpPoint const * point
-)
-{
-    if (!point) {
-        fprintf(_vdp_cap_data.fp, "NULL");
-        return;
-    }
-
-    fprintf(
-        _vdp_cap_data.fp,
-        "{%u, %u}",
-        point->x,
-        point->y
-    );
-}
-
 static void _vdp_cap_dump_rect(
     VdpRect const * rect
 )
