@@ -451,16 +451,16 @@ static void _vdp_cap_dump_picture_info(
                 (int32_t)picture_info_mpeg4->trb[0],
                 (int32_t)picture_info_mpeg4->trb[1],
                 (uint32_t)picture_info_mpeg4->vop_time_increment_resolution,
-                (uint32_t)picture_info_mpeg4->vop_coding_type, 
+                (uint32_t)picture_info_mpeg4->vop_coding_type,
                 (uint32_t)picture_info_mpeg4->vop_fcode_forward,
                 (uint32_t)picture_info_mpeg4->vop_fcode_backward,
                 (uint32_t)picture_info_mpeg4->resync_marker_disable,
-                (uint32_t)picture_info_mpeg4->interlaced, 
-                (uint32_t)picture_info_mpeg4->quant_type,   
-                (uint32_t)picture_info_mpeg4->quarter_sample, 
-                (uint32_t)picture_info_mpeg4->short_video_header, 
+                (uint32_t)picture_info_mpeg4->interlaced,
+                (uint32_t)picture_info_mpeg4->quant_type,
+                (uint32_t)picture_info_mpeg4->quarter_sample,
+                (uint32_t)picture_info_mpeg4->short_video_header,
                 (uint32_t)picture_info_mpeg4->rounding_control,
-                (uint32_t)picture_info_mpeg4->alternate_vertical_scan_flag, 
+                (uint32_t)picture_info_mpeg4->alternate_vertical_scan_flag,
                 (uint32_t)picture_info_mpeg4->top_field_first
             );
             for (uint32_t i = 0; i < _VDP_TRACE_ARSIZE(picture_info_mpeg4->intra_quantizer_matrix); ++i) {
