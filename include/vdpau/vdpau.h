@@ -2638,7 +2638,7 @@ typedef struct {
 } VdpBitstreamBuffer;
 
 /**
- * \brief A generic "picture information" pointer type.
+ * \brief A generic "picture information" type.
  *
  * This type serves solely to document the expected usage of a
  * generic (void *) function parameter. In actual usage, the
@@ -2647,7 +2647,7 @@ typedef struct {
  * picking the type appropriate for the decoder object in
  * question.
  */
-typedef void * VdpPictureInfo;
+typedef void VdpPictureInfo;
 
 /**
  * \brief Picture parameter information for an MPEG 1 or MPEG 2
