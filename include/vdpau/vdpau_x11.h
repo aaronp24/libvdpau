@@ -81,6 +81,8 @@ extern "C" {
  *   - \c /usr/lib/vdpau/libvdpau_nvidia.so.1
  *   - \c /usr/lib/vdpau/libvdpau_intel.so.1
  *   - \c /usr/lib/vdpau/libvdpau_ati.so.1
+ *   The library path can be overridden by the VDPAU_DRIVER_PATH
+ *   environment variable.
  *
  * The VDPAU wrapper library implements just one function; \ref
  * vdp_device_create_x11. The wrapper will implement this function

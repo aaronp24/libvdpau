@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <vdpau/vdpau_x11.h>
 #if DRI2
 #include "mesa_dri2.h"
@@ -66,7 +67,8 @@ static void _vdp_wrapper_error_breakpoint(char const * file, int line, char cons
 
 #endif
 
-#define DRIVER_LIB_FORMAT "%slibvdpau_%s.so%s"
+#define DRIVER_FALLBACK_LIB_FORMAT "libvdpau_%s.so"
+#define DRIVER_LIB_FORMAT "%s/libvdpau_%s.so.1"
 
 static char * _vdp_get_driver_name_from_dri2(
     Display *             display,
@@ -107,6 +109,7 @@ static VdpStatus _vdp_open_driver(
 {
     char const * vdpau_driver;
     char * vdpau_driver_dri2 = NULL;
+    const char * vdpau_driver_path = NULL;
     char         vdpau_driver_lib[PATH_MAX];
     char const * vdpau_trace;
     char const * func_name;
@@ -120,24 +123,41 @@ static VdpStatus _vdp_open_driver(
         vdpau_driver = "nvidia";
     }
 
-    if (snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib), DRIVER_LIB_FORMAT,
-                 VDPAU_MODULEDIR "/", vdpau_driver, ".1") >=
-            sizeof(vdpau_driver_lib)) {
-        fprintf(stderr, "Failed to construct driver path: path too long\n");
-        if (vdpau_driver_dri2) {
-            XFree(vdpau_driver_dri2);
-            vdpau_driver_dri2 = NULL;
+    if (geteuid() == getuid()) {
+        /* don't allow setuid apps to use VDPAU_DRIVER_PATH */
+        vdpau_driver_path = getenv("VDPAU_DRIVER_PATH");
+        if (vdpau_driver_path &&
+            snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib),
+                     DRIVER_LIB_FORMAT, vdpau_driver_path, vdpau_driver) <
+                sizeof(vdpau_driver_lib)) {
+            _vdp_driver_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
         }
-        _VDP_ERROR_BREAKPOINT();
-        return VDP_STATUS_NO_IMPLEMENTATION;
     }
 
-    _vdp_driver_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
+    /* Fallback to VDPAU_MODULEDIR when VDPAU_DRIVER_PATH is not set,
+     * or if we fail to create the driver path/dlopen the library. */
+    if (!_vdp_driver_dll) {
+        if (snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib),
+                     DRIVER_LIB_FORMAT, VDPAU_MODULEDIR, vdpau_driver) >=
+                sizeof(vdpau_driver_lib)) {
+            fprintf(stderr, "Failed to construct driver path: path too long\n");
+            if (vdpau_driver_dri2) {
+                XFree(vdpau_driver_dri2);
+                vdpau_driver_dri2 = NULL;
+            }
+            _VDP_ERROR_BREAKPOINT();
+            return VDP_STATUS_NO_IMPLEMENTATION;
+        }
+        else {
+            _vdp_driver_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
+        }
+    }
+
     if (!_vdp_driver_dll) {
         /* Try again using the old path, which is guaranteed to fit in PATH_MAX
          * if the complete path fit above. */
-        snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib), DRIVER_LIB_FORMAT,
-                 "", vdpau_driver, "");
+        snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib),
+                 DRIVER_FALLBACK_LIB_FORMAT, vdpau_driver);
         _vdp_driver_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
     }
 
