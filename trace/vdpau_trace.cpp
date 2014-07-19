@@ -849,7 +849,7 @@ static bool _vdp_cap_init_planes_adapt_format_bits_indexed(
     );
 }
 
-bool _vdp_cap_init_planes_adapt_surface_video(
+static bool _vdp_cap_init_planes_adapt_surface_video(
     uint32_t   surface,
     uint32_t * surface_format,
     uint32_t * width,
@@ -874,7 +874,7 @@ bool _vdp_cap_init_planes_adapt_surface_video(
     return true;
 }
 
-bool _vdp_cap_init_planes_adapt_surface_output(
+static bool _vdp_cap_init_planes_adapt_surface_output(
     uint32_t   surface,
     uint32_t * surface_format,
     uint32_t * width,
@@ -899,7 +899,7 @@ bool _vdp_cap_init_planes_adapt_surface_output(
     return true;
 }
 
-bool _vdp_cap_init_planes_adapt_surface_bitmap(
+static bool _vdp_cap_init_planes_adapt_surface_bitmap(
     uint32_t   surface,
     uint32_t * surface_format,
     uint32_t * width,
