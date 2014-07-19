@@ -37,17 +37,24 @@
 
 #include <X11/extensions/dri2tokens.h>
 
-extern Bool
+#if (defined(__GNUC__) && __GNUC__ >= 4)
+  #define PRIVATE __attribute__ ((visibility("hidden")))
+#else
+  #define PRIVATE
+#endif
+
+
+PRIVATE extern Bool
 _vdp_DRI2QueryExtension(Display * display, int *eventBase, int *errorBase);
 
-extern Bool
+PRIVATE extern Bool
 _vdp_DRI2QueryVersion(Display * display, int *major, int *minor);
 
-extern Bool
+PRIVATE extern Bool
 _vdp_DRI2Connect(Display * display, XID window, char **driverName,
                  char **deviceName);
 
-extern void
+PRIVATE extern void
 _vdp_DRI2RemoveExtension(Display * display);
 
 #endif
