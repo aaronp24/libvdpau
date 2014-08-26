@@ -2231,8 +2231,8 @@ typedef struct {
  *       missing components are treated as 1.0. For example, for
  *       an A8 VdpOutputSurface, alpha will come from the surface
  *       but red, green and blue will be treated as 1.0. If
- *       source_surface is NULL, all components will be treated
- *       as 1.0. Note that destination_surface and
+ *       source_surface is VDP_INVALID_HANDLE, all components will
+ *       be treated as 1.0. Note that destination_surface and
  *       source_surface must have been allocated via the same
  *       \ref VdpDevice "VdpDevice".
  * \param[in] source_rect The sub-rectangle of the source
@@ -2311,8 +2311,8 @@ typedef VdpStatus VdpOutputSurfaceRenderOutputSurface(
  *       missing components are treated as 1.0. For example, for
  *       an A8 VdpBitmapSurface, alpha will come from the surface
  *       but red, green and blue will be treated as 1.0. If
- *       source_surface is NULL, all components will be treated
- *       as 1.0. Note that destination_surface and
+ *       source_surface is VDP_INVALID_HANDLE, all components will
+ *       be treated as 1.0. Note that destination_surface and
  *       source_surface must have been allocated via the same
  *       \ref VdpDevice "VdpDevice".
  * \param[in] source_rect The sub-rectangle of the source
