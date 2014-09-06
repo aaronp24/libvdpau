@@ -536,7 +536,7 @@ static void _vdp_cap_dump_video_mixer_attribute_value(
             // the value, so it can either fill in the value, or NULL out the
             // pointer.
             if (get_operation) {
-                ptr = *(VdpCSCMatrix const * *)value;
+                ptr = *(VdpCSCMatrix const * const *)value;
             }
             else {
                 ptr = (VdpCSCMatrix const *)value;
@@ -1172,7 +1172,7 @@ static void _vdp_cap_dump_bitstream_buffer_list(
             buffers[0].bitstream_bytes
         );
         if (_vdp_cap_data.level >= LEVEL_DATA) {
-            uint8_t * ptr = (uint8_t * )buffers[0].bitstream;
+            const uint8_t * ptr = (const uint8_t * )buffers[0].bitstream;
             for (uint32_t i = 0; i < buffers[0].bitstream_bytes; ++i) {
                 fprintf(_vdp_cap_data.fp, "%02x ", ptr[i]);
             }
