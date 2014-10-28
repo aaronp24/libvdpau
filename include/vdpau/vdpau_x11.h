@@ -102,7 +102,7 @@ extern "C" {
  * case, the wrapper library may load multiple back-end drivers
  * into the same application, and/or invoke a specific back-end
  * driver's \b VdpImpDeviceCreateX11 multiple times. The wrapper
- * libray imposes no policy regarding whether the application
+ * library imposes no policy regarding whether the application
  * may instantiate multiple \ref VdpDevice "VdpDevice" objects for
  * the same display and/or screen. However, back-end drivers are
  * free to limit the number of \ref VdpDevice "VdpDevice" objects
