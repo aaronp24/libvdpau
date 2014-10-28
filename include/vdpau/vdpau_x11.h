@@ -85,13 +85,13 @@ extern "C" {
  *   environment variable.
  *
  * The VDPAU wrapper library implements just one function; \ref
- * vdp_device_create_x11. The wrapper will implement this function
- * by dynamically loading the appropriate back-end driver file
- * mentioned above. Long-term, the wrapper will use a
- * VDPAU-specific X  extension to determine which back-end driver
- * to load. Currently, the wrapper library hard-codes the driver
- * name as "nvidia", although this can be overridden using the
- * environment variable VDPAU_DRIVER.
+ * vdp_device_create_x11. The wrapper implements this function by
+ * dynamically loading the appropriate back-end driver file mentioned
+ * above. When available, the wrapper uses the DRI2 extension's
+ * DRI2Connect request with the driver type 'DRI2DriverVDPAU' to
+ * determine which back-end driver to load. If that fails, the wrapper
+ * library hard-codes the driver name as "nvidia", although this can
+ * be overridden using the environment variable VDPAU_DRIVER.
  *
  * The back-end driver is expected to implement a function named
  * \b vdp_imp_device_create_x11. The wrapper will call this function to
