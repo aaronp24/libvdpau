@@ -28,7 +28,7 @@ static int countOpenFDs(void)
     return count;
 }
 
-int main()
+int main(void)
 {
     // Work around a bug in libXext: dlclosing it after it has registered the
     // Generic Event Extension causes an identical bug to the one this program
