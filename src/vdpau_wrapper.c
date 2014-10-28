@@ -99,6 +99,8 @@ static char * _vdp_get_driver_name_from_dri2(
 
     XFree(device_name);
     _vdp_DRI2RemoveExtension(display);
+#else
+    (void) display; (void) screen;
 #endif /* DRI2 */
     return driver_name;
 }
@@ -278,6 +280,7 @@ static VdpStatus pq_set_bg_color_noop(
     VdpColor * const     background_color
 )
 {
+    (void) presentation_queue; (void) background_color;
     return VDP_STATUS_OK;
 }
 
