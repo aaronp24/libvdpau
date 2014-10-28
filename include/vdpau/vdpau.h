@@ -2437,6 +2437,14 @@ typedef uint32_t VdpDecoderProfile;
 #define VDP_DECODER_PROFILE_DIVX5_HOME_THEATER          ((VdpDecoderProfile)20)
 /** \hideinitializer */
 #define VDP_DECODER_PROFILE_DIVX5_HD_1080P              ((VdpDecoderProfile)21)
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_H264_CONSTRAINED_BASELINE   ((VdpDecoderProfile)22)
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_H264_EXTENDED               ((VdpDecoderProfile)23)
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_H264_PROGRESSIVE_HIGH       ((VdpDecoderProfile)24)
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_H264_CONSTRAINED_HIGH       ((VdpDecoderProfile)25)
 
 /** \hideinitializer */
 #define VDP_DECODER_LEVEL_MPEG1_NA 0
