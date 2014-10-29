@@ -21,6 +21,7 @@ endif
 
 libvdpau_la_LIBADD = \
     $(DLOPEN_LIBS) \
+    $(PTHREAD_LIBS) \
     $(XEXT_LIBS)
 
 libvdpau_la_LDFLAGS = -version-info 1:0:0 -no-undefined

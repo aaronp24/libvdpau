@@ -27,6 +27,7 @@
 
 #include <dlfcn.h>
 #include <limits.h>
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -238,7 +239,6 @@ static void _vdp_close_driver(void)
 static VdpGetProcAddress * _imp_get_proc_address;
 static VdpVideoSurfacePutBitsYCbCr * _imp_vid_put_bits_y_cb_cr;
 static VdpPresentationQueueSetBackgroundColor * _imp_pq_set_bg_color;
-static int _inited_fixes;
 static int _running_under_flash;
 static int _enable_flash_uv_swap = 1;
 static int _disable_flash_pq_bg_color = 1;
@@ -385,11 +385,6 @@ static void init_config(void)
 
 static void init_fixes(void)
 {
-    if (_inited_fixes) {
-        return;
-    }
-    _inited_fixes = 1;
-
     init_running_under_flash();
     init_config();
 }
@@ -402,9 +397,10 @@ VdpStatus vdp_device_create_x11(
     VdpGetProcAddress * * get_proc_address
 )
 {
+    static pthread_once_t once = PTHREAD_ONCE_INIT;
     VdpStatus status;
 
-    init_fixes();
+    pthread_once(&once, init_fixes);
 
     if (!_vdp_imp_device_create_x11_proc) {
         status = _vdp_open_driver(display, screen);
