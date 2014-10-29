@@ -399,6 +399,7 @@ VdpStatus vdp_device_create_x11(
 {
     static pthread_once_t once = PTHREAD_ONCE_INIT;
     static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+    VdpGetProcAddress *gpa;
     VdpStatus status = VDP_STATUS_OK;
 
     pthread_once(&once, init_fixes);
@@ -414,17 +415,33 @@ VdpStatus vdp_device_create_x11(
     if (status != VDP_STATUS_OK)
         return status;
 
-    status = _vdp_imp_device_create_x11_proc(
-        display,
-        screen,
-        device,
-        &_imp_get_proc_address
-    );
+    status = _vdp_imp_device_create_x11_proc(display, screen, device, &gpa);
     if (status != VDP_STATUS_OK) {
         return status;
     }
 
     *get_proc_address = vdp_wrapper_get_proc_address;
 
-    return VDP_STATUS_OK;
+    pthread_mutex_lock(&lock);
+    if (_imp_get_proc_address != gpa) {
+        if (_imp_get_proc_address == NULL)
+            _imp_get_proc_address = gpa;
+        else
+        /* Currently the wrapper can only deal with one back-end.
+         * This should never happen, but better safe than sorry. */
+            status = VDP_STATUS_NO_IMPLEMENTATION;
+    }
+    pthread_mutex_unlock(&lock);
+
+    if (status != VDP_STATUS_OK) {
+        void *pv;
+
+        if (gpa(*device, VDP_FUNC_ID_DEVICE_DESTROY, &pv) == VDP_STATUS_OK) {
+            VdpDeviceDestroy *device_destroy = pv;
+
+            device_destroy(*device);
+        }
+    }
+
+    return status;
 }
