@@ -12,7 +12,6 @@
 static int countOpenFDs(void)
 {
     DIR *dir = opendir("/proc/self/fd");
-    struct dirent *ent;
     int count = 0;
 
     if (!dir) {
@@ -21,7 +20,7 @@ static int countOpenFDs(void)
         return 0;
     }
 
-    while (ent = readdir(dir)) {
+    while (readdir(dir) != NULL) {
         count++;
     }
 
