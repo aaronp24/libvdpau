@@ -398,17 +398,21 @@ VdpStatus vdp_device_create_x11(
 )
 {
     static pthread_once_t once = PTHREAD_ONCE_INIT;
-    VdpStatus status;
+    static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+    VdpStatus status = VDP_STATUS_OK;
 
     pthread_once(&once, init_fixes);
 
+    pthread_mutex_lock(&lock);
     if (!_vdp_imp_device_create_x11_proc) {
         status = _vdp_open_driver(display, screen);
-        if (status != VDP_STATUS_OK) {
+        if (status != VDP_STATUS_OK)
             _vdp_close_driver();
-            return status;
-        }
     }
+    pthread_mutex_unlock(&lock);
+
+    if (status != VDP_STATUS_OK)
+        return status;
 
     status = _vdp_imp_device_create_x11_proc(
         display,
