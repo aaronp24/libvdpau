@@ -707,10 +707,25 @@
  *
  * A few structures are considered plausible candidates for future extension.
  * Such structures include a version number as the first field, indicating the
- * exact layout of the client-provided data. Such structures may only be
- * modified by adding new fields to the end of the structure, so that the
- * original structure definition is completely compatible with a leading
- * subset of fields of the extended structure.
+ * exact layout of the client-provided data. When changing such structures, the
+ * old structure must be preserved and a new structure created. This allows
+ * applications built against the old version of the structure to continue to
+ * interoperate. For example, to extend the VdpProcamp structure, define a new
+ * VdpProcamp1 and update VdpGenerateCSCMatrix to take the new structure as an
+ * argument. Document in a comment that the caller must fill the struct_version
+ * field with the value 1. VDPAU implementations should use the struct_version
+ * field to determine which version of the structure the application was built
+ * against.  Note that you cannot simply increment the value of
+ * VDP_PROCAMP_VERSION because applications recompiled against a newer version
+ * of vdpau.h but that have not been updated to use the new structure must still
+ * report that they're using version 0.
+ *
+ * Note that the layouts of VdpPictureInfo structures are defined by their
+ * corresponding VdpDecoderProfile numbers, so no struct_version field is
+ * needed for them. This layout includes the size of the structure, so new
+ * profiles that extend existing functionality may incorporate the old
+ * VdpPictureInfo as a substructure, but may not modify existing VdpPictureInfo
+ * structures.
  *
  * \subsection extend_functions Functions
  *
