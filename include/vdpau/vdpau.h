@@ -2460,6 +2460,9 @@ typedef uint32_t VdpDecoderProfile;
 #define VDP_DECODER_PROFILE_H264_PROGRESSIVE_HIGH       ((VdpDecoderProfile)24)
 /** \hideinitializer */
 #define VDP_DECODER_PROFILE_H264_CONSTRAINED_HIGH       ((VdpDecoderProfile)25)
+/** \hideinitializer */
+/** \brief Support for 8 bit depth only */
+#define VDP_DECODER_PROFILE_H264_HIGH_444_PREDICTIVE    ((VdpDecoderProfile)26)
 
 /** \hideinitializer */
 #define VDP_DECODER_LEVEL_MPEG1_NA 0
@@ -2779,6 +2782,10 @@ typedef struct {
  * Note: References to "copy of bitstream field" in the field descriptions
  * may refer to data literally parsed from the bitstream, or derived from
  * the bitstream using a mechanism described in the specification.
+ *
+ * Note: VDPAU clients must use VdpPictureInfoH264Predictive to describe the
+ * attributes of a frame being decoded with
+ * VDP_DECODER_PROFILE_H264_HIGH_444_PREDICTIVE.
  */
 typedef struct {
     /** Number of slices in the bitstream provided. */
@@ -2845,6 +2852,33 @@ typedef struct {
     /** See \ref VdpPictureInfoH264 for instructions regarding this field. */
     VdpReferenceFrameH264 referenceFrames[16];
 } VdpPictureInfoH264;
+
+/**
+ * \brief Picture parameter information for an H.264 Hi444PP picture.
+ *
+ * Note: VDPAU clients must use VdpPictureInfoH264Predictive to describe the
+ * attributes of a frame being decoded with
+ * VDP_DECODER_PROFILE_H264_HIGH_444_PREDICTIVE.
+ *
+ * Note: software drivers may choose to honor values of
+ * qpprime_y_zero_transform_bypass_flag greater than 1 for internal use.
+ */
+typedef struct {
+    /** \ref VdpPictureInfoH264 struct. */
+    VdpPictureInfoH264 pictureInfo;
+    /** Copy of the H.264 bitstream field.
+     *
+     *  0 - lossless disabled
+     *  1 - lossless enabled
+     */
+    uint8_t qpprime_y_zero_transform_bypass_flag;
+    /** Copy of the H.264 bitstream field.
+     *  0 - disabled
+     *  1 - enabled
+     */
+    uint8_t separate_colour_plane_flag;
+
+} VdpPictureInfoH264Predictive;
 
 /**
  * \brief Picture parameter information for a VC1 picture.
