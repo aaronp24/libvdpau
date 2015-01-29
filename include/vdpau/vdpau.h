@@ -2742,9 +2742,9 @@ typedef void VdpPictureInfo;
  * \brief Picture parameter information for an MPEG 1 or MPEG 2
  *        picture.
  *
- * Note: References to "copy of bitstream field" in the field descriptions
- * may refer to data literally parsed from the bitstream, or derived from
- * the bitstream using a mechanism described in the specification.
+ * Note: References to bitstream fields below may refer to data literally parsed
+ * from the bitstream, or derived from the bitstream using a mechanism described
+ * in the specification.
  */
 typedef struct {
     /**
@@ -2760,45 +2760,38 @@ typedef struct {
     /** Number of slices in the bitstream provided. */
     uint32_t        slice_count;
 
-    /** Copy of the MPEG bitstream field. */
+    /** \name MPEG bitstream
+     *
+     * Copies of the MPEG bitstream fields.
+     * @{ */
     uint8_t picture_structure;
-    /** Copy of the MPEG bitstream field. */
     uint8_t picture_coding_type;
-    /** Copy of the MPEG bitstream field. */
     uint8_t intra_dc_precision;
-    /** Copy of the MPEG bitstream field. */
     uint8_t frame_pred_frame_dct;
-    /** Copy of the MPEG bitstream field. */
     uint8_t concealment_motion_vectors;
-    /** Copy of the MPEG bitstream field. */
     uint8_t intra_vlc_format;
-    /** Copy of the MPEG bitstream field. */
     uint8_t alternate_scan;
-    /** Copy of the MPEG bitstream field. */
     uint8_t q_scale_type;
-    /** Copy of the MPEG bitstream field. */
     uint8_t top_field_first;
-    /** Copy of the MPEG-1 bitstream field. For MPEG-2, set to 0. */
+    /** MPEG-1 only. For MPEG-2, set to 0. */
     uint8_t full_pel_forward_vector;
-    /** Copy of the MPEG-1 bitstream field. For MPEG-2, set to 0. */
+    /** MPEG-1 only. For MPEG-2, set to 0. */
     uint8_t full_pel_backward_vector;
-    /**
-     * Copy of the MPEG bitstream field.
-     * For MPEG-1, fill both horizontal and vertical entries.
-     */
+    /** For MPEG-1, fill both horizontal and vertical entries. */
     uint8_t f_code[2][2];
-    /** Copy of the MPEG bitstream field, converted to raster order. */
+    /** Convert to raster order. */
     uint8_t intra_quantizer_matrix[64];
-    /** Copy of the MPEG bitstream field, converted to raster order. */
+    /** Convert to raster order. */
     uint8_t non_intra_quantizer_matrix[64];
+    /** @} */
 } VdpPictureInfoMPEG1Or2;
 
 /**
  * \brief Information about an H.264 reference frame
  *
- * Note: References to "copy of bitstream field" in the field descriptions
- * may refer to data literally parsed from the bitstream, or derived from
- * the bitstream using a mechanism described in the specification.
+ * Note: References to bitstream fields below may refer to data literally parsed
+ * from the bitstream, or derived from the bitstream using a mechanism described
+ * in the specification.
  */
 typedef struct {
     /**
@@ -2842,9 +2835,9 @@ typedef struct {
  * VdpDecoderRender may be used as reference frames. In particular,
  * surfaces filled using any "put bits" API will not work.
  *
- * Note: References to "copy of bitstream field" in the field descriptions
- * may refer to data literally parsed from the bitstream, or derived from
- * the bitstream using a mechanism described in the specification.
+ * Note: References to bitstream fields below may refer to data literally parsed
+ * from the bitstream, or derived from the bitstream using a mechanism described
+ * in the specification.
  *
  * Note: VDPAU clients must use VdpPictureInfoH264Predictive to describe the
  * attributes of a frame being decoded with
@@ -2858,59 +2851,39 @@ typedef struct {
     /** Will the decoded frame be used as a reference later. */
     VdpBool  is_reference;
 
-    /** Copy of the H.264 bitstream field. */
+    /** \name H.264 bitstream
+     *
+     * Copies of the H.264 bitstream fields.
+     * @{ */
     uint16_t frame_num;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  field_pic_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  bottom_field_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  num_ref_frames;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  mb_adaptive_frame_field_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  constrained_intra_pred_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  weighted_pred_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  weighted_bipred_idc;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  frame_mbs_only_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  transform_8x8_mode_flag;
-    /** Copy of the H.264 bitstream field. */
     int8_t   chroma_qp_index_offset;
-    /** Copy of the H.264 bitstream field. */
     int8_t   second_chroma_qp_index_offset;
-    /** Copy of the H.264 bitstream field. */
     int8_t   pic_init_qp_minus26;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  num_ref_idx_l0_active_minus1;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  num_ref_idx_l1_active_minus1;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  log2_max_frame_num_minus4;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  pic_order_cnt_type;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  log2_max_pic_order_cnt_lsb_minus4;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  delta_pic_order_always_zero_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  direct_8x8_inference_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  entropy_coding_mode_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  pic_order_present_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  deblocking_filter_control_present_flag;
-    /** Copy of the H.264 bitstream field. */
     uint8_t  redundant_pic_cnt_present_flag;
-
-    /** Copy of the H.264 bitstream field, converted to raster order. */
+    /** Convert to raster order. */
     uint8_t scaling_lists_4x4[6][16];
-    /** Copy of the H.264 bitstream field, converted to raster order. */
+    /** Convert to raster order. */
     uint8_t scaling_lists_8x8[2][64];
+    /** @} */
 
     /** See \ref VdpPictureInfoH264 for instructions regarding this field. */
     VdpReferenceFrameH264 referenceFrames[16];
@@ -2929,26 +2902,30 @@ typedef struct {
 typedef struct {
     /** \ref VdpPictureInfoH264 struct. */
     VdpPictureInfoH264 pictureInfo;
-    /** Copy of the H.264 bitstream field.
+
+    /** \name H.264 bitstream
      *
+     * Copies of the H.264 bitstream fields.
+     * @{ */
+    /**
      *  0 - lossless disabled
      *  1 - lossless enabled
      */
     uint8_t qpprime_y_zero_transform_bypass_flag;
-    /** Copy of the H.264 bitstream field.
+    /**
      *  0 - disabled
      *  1 - enabled
      */
     uint8_t separate_colour_plane_flag;
-
+    /** @} */
 } VdpPictureInfoH264Predictive;
 
 /**
  * \brief Picture parameter information for a VC1 picture.
  *
- * Note: References to "copy of bitstream field" in the field descriptions
- * may refer to data literally parsed from the bitstream, or derived from
- * the bitstream using a mechanism described in the specification.
+ * Note: References to bitstream fields below may refer to data literally parsed
+ * from the bitstream, or derived from the bitstream using a mechanism described
+ * in the specification.
  */
 typedef struct {
     /**
@@ -2969,54 +2946,56 @@ typedef struct {
     /** Progressive=0, Frame-interlace=2, Field-interlace=3; see VC-1 7.1.1.15. */
     uint8_t  frame_coding_mode;
 
-    /** Copy of the VC-1 bitstream field. See VC-1 6.1.5. */
+    /** \name VC-1 bitstream
+     *
+     * Copies of the VC-1 bitstream fields.
+     * @{ */
+    /** See VC-1 6.1.5. */
     uint8_t postprocflag;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.1.8. */
+    /** See VC-1 6.1.8. */
     uint8_t pulldown;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.1.9. */
+    /** See VC-1 6.1.9. */
     uint8_t interlace;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.1.10. */
+    /** See VC-1 6.1.10. */
     uint8_t tfcntrflag;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.1.11. */
+    /** See VC-1 6.1.11. */
     uint8_t finterpflag;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.1.3. */
+    /** See VC-1 6.1.3. */
     uint8_t psf;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.8. */
+    /** See VC-1 6.2.8. */
     uint8_t dquant;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.3. */
+    /** See VC-1 6.2.3. */
     uint8_t panscan_flag;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.4. */
+    /** See VC-1 6.2.4. */
     uint8_t refdist_flag;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.11. */
+    /** See VC-1 6.2.11. */
     uint8_t quantizer;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.7. */
+    /** See VC-1 6.2.7. */
     uint8_t extended_mv;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.14. */
+    /** See VC-1 6.2.14. */
     uint8_t extended_dmv;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.10. */
+    /** See VC-1 6.2.10. */
     uint8_t overlap;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.9. */
+    /** See VC-1 6.2.9. */
     uint8_t vstransform;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.5. */
+    /** See VC-1 6.2.5. */
     uint8_t loopfilter;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.6. */
+    /** See VC-1 6.2.6. */
     uint8_t fastuvmc;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.12.15. */
+    /** See VC-1 6.12.15. */
     uint8_t range_mapy_flag;
-    /** Copy of the VC-1 bitstream field. */
     uint8_t range_mapy;
-    /** Copy of the VC-1 bitstream field. See VC-1 6.2.16. */
+    /** See VC-1 6.2.16. */
     uint8_t range_mapuv_flag;
-    /** Copy of the VC-1 bitstream field. */
     uint8_t range_mapuv;
 
     /**
-     * Copy of the VC-1 bitstream field. See VC-1 J.1.10.
+     * See VC-1 J.1.10.
      * Only used by simple and main profiles.
      */
     uint8_t multires;
     /**
-     * Copy of the VC-1 bitstream field. See VC-1 J.1.16.
+     * See VC-1 J.1.16.
      * Only used by simple and main profiles.
      */
     uint8_t syncmarker;
@@ -3028,10 +3007,11 @@ typedef struct {
      */
     uint8_t rangered;
     /**
-     * Copy of the VC-1 bitstream field. See VC-1 J.1.17.
+     * See VC-1 J.1.17.
      * Only used by simple and main profiles.
      */
     uint8_t maxbframes;
+    /** @} */
 
     /**
      * Out-of-loop deblocking enable.
@@ -3050,9 +3030,9 @@ typedef struct {
 /**
  * \brief Picture parameter information for an MPEG-4 Part 2 picture.
  *
- * Note: References to "copy of bitstream field" in the field descriptions
- * may refer to data literally parsed from the bitstream, or derived from
- * the bitstream using a mechanism described in the specification.
+ * Note: References to bitstream fields below may refer to data literally parsed
+ * from the bitstream, or derived from the bitstream using a mechanism described
+ * in the specification.
  */
 typedef struct {
     /**
@@ -3066,38 +3046,28 @@ typedef struct {
      */
     VdpVideoSurface backward_reference;
 
-    /** Copy of the bitstream field. */
+    /** \name MPEG 4 part 2 bitstream
+     *
+     * Copies of the MPEG 4 part 2 bitstream fields.
+     * @{ */
     int32_t trd[2];
-    /** Copy of the bitstream field. */
     int32_t trb[2];
-    /** Copy of the bitstream field. */
     uint16_t vop_time_increment_resolution;
-    /** Copy of the bitstream field. */
     uint8_t vop_coding_type;
-    /** Copy of the bitstream field. */
     uint8_t vop_fcode_forward;
-    /** Copy of the bitstream field. */
     uint8_t vop_fcode_backward;
-    /** Copy of the bitstream field. */
     uint8_t resync_marker_disable;
-    /** Copy of the bitstream field. */
     uint8_t interlaced;
-    /** Copy of the bitstream field. */
     uint8_t quant_type;
-    /** Copy of the bitstream field. */
     uint8_t quarter_sample;
-    /** Copy of the bitstream field. */
     uint8_t short_video_header;
     /** Derived from vop_rounding_type bitstream field. */
     uint8_t rounding_control;
-    /** Copy of the bitstream field. */
     uint8_t alternate_vertical_scan_flag;
-    /** Copy of the bitstream field. */
     uint8_t top_field_first;
-    /** Copy of the bitstream field. */
     uint8_t intra_quantizer_matrix[64];
-    /** Copy of the bitstream field. */
     uint8_t non_intra_quantizer_matrix[64];
+    /** @} */
 } VdpPictureInfoMPEG4Part2;
 
 /**
@@ -3119,11 +3089,10 @@ typedef VdpPictureInfoMPEG4Part2 VdpPictureInfoDivX5;
 /**
  * \brief Picture parameter information for an H.265/HEVC picture.
  *
- * References to "copy of ... bitstream field" in the field descriptions
- * may refer to data literally parsed from the bitstream,
- * or derived from the bitstream using a mechanism described in
- * Rec. ITU-T H.265 (04/2013), hereafter referred to as
- * "the H.265/HEVC Specification".
+ * References to bitsream fields below may refer to data literally parsed from
+ * the bitstream, or derived from the bitstream using a mechanism described in
+ * Rec. ITU-T H.265 (04/2013), hereafter referred to as "the H.265/HEVC
+ * Specification".
  *
  * VDPAU H.265/HEVC implementations implement the portion of the decoding
  * process described by clauses 8.4, 8.5, 8.6 and 8.7 of the the
@@ -3135,38 +3104,27 @@ typedef VdpPictureInfoMPEG4Part2 VdpPictureInfoDivX5;
  * Client applications must supply every field in this struct.
  */
 typedef struct {
-    /** Copy of the Sequence Parameter Set bitstream field. */
+    /** \name HEVC Sequence Parameter Set
+     *
+     * Copies of the HEVC Sequence Parameter Set bitstream fields.
+     * @{ */
     uint8_t chroma_format_idc;
-    /** Copy of the Sequence Parameter Set bitstream field.
-        Only valid if chroma_format_idc == 3. Ignored otherwise.*/
+    /** Only valid if chroma_format_idc == 3. Ignored otherwise.*/
     uint8_t separate_colour_plane_flag;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint32_t pic_width_in_luma_samples;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint32_t pic_height_in_luma_samples;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t bit_depth_luma_minus8;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t bit_depth_chroma_minus8;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t log2_max_pic_order_cnt_lsb_minus4;
-    /** Copy of the Sequence Parameter Set bitstream field. Provides
-        the value corresponding to the nuh_temporal_id of the frame
+    /** Provides the value corresponding to the nuh_temporal_id of the frame
         to be decoded. */
     uint8_t sps_max_dec_pic_buffering_minus1;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t log2_min_luma_coding_block_size_minus3;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t log2_diff_max_min_luma_coding_block_size;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t log2_min_transform_block_size_minus2;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t log2_diff_max_min_transform_block_size;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t max_transform_hierarchy_depth_inter;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t max_transform_hierarchy_depth_intra;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t scaling_list_enabled_flag;
     /** Scaling lists, in diagonal order, to be used for this frame. */
     /** Scaling List for 4x4 quantization matrix,
@@ -3187,144 +3145,104 @@ typedef struct {
     /** Scaling List DC Coefficients for 32x32,
        indexed as ScalingListDCCoeff32x32[matrixId]. */
     uint8_t ScalingListDCCoeff32x32[2];
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t amp_enabled_flag;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t sample_adaptive_offset_enabled_flag;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t pcm_enabled_flag;
-    /** Copy of the Sequence Parameter Set bitstream field.
-        Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
+    /** Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
     uint8_t pcm_sample_bit_depth_luma_minus1;
-    /** Copy of the Sequence Parameter Set bitstream field.
-        Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
+    /** Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
     uint8_t pcm_sample_bit_depth_chroma_minus1;
-    /** Copy of the Sequence Parameter Set bitstream field.
-        Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
+    /** Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
     uint8_t log2_min_pcm_luma_coding_block_size_minus3;
-    /** Copy of the Sequence Parameter Set bitstream field.
-        Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
+    /** Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
     uint8_t log2_diff_max_min_pcm_luma_coding_block_size;
-    /** Copy of the Sequence Parameter Set bitstream field.
-        Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
+    /** Only needs to be set if pcm_enabled_flag is set. Ignored otherwise. */
     uint8_t pcm_loop_filter_disabled_flag;
-    /** Copy of the Sequence Parameter Set bitstream field.
-        Per spec, when zero, assume short_term_ref_pic_set_sps_flag
+    /** Per spec, when zero, assume short_term_ref_pic_set_sps_flag
         is also zero. */
     uint8_t num_short_term_ref_pic_sets;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t long_term_ref_pics_present_flag;
-    /** Copy of the Sequence Parameter Set bitstream field.
-        Only needed if long_term_ref_pics_present_flag is set. Ignored
+    /** Only needed if long_term_ref_pics_present_flag is set. Ignored
         otherwise. */
     uint8_t num_long_term_ref_pics_sps;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t sps_temporal_mvp_enabled_flag;
-    /** Copy of the Sequence Parameter Set bitstream field. */
     uint8_t strong_intra_smoothing_enabled_flag;
+    /** @} */
 
-    /** Copy of the Picture Parameter Set bitstream field. */
+    /** \name HEVC Picture Parameter Set
+     *
+     * Copies of the HEVC Picture Parameter Set bitstream fields.
+     * @{ */
     uint8_t dependent_slice_segments_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t output_flag_present_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t num_extra_slice_header_bits;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t sign_data_hiding_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t cabac_init_present_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t num_ref_idx_l0_default_active_minus1;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t num_ref_idx_l1_default_active_minus1;
-    /** Copy of the Picture Parameter Set bitstream field. */
     int8_t init_qp_minus26;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t constrained_intra_pred_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t transform_skip_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t cu_qp_delta_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only needed if cu_qp_delta_enabled_flag is set. Ignored otherwise. */
+    /** Only needed if cu_qp_delta_enabled_flag is set. Ignored otherwise. */
     uint8_t diff_cu_qp_delta_depth;
-    /** Copy of the Picture Parameter Set bitstream field. */
     int8_t pps_cb_qp_offset;
-    /** Copy of the Picture Parameter Set bitstream field. */
     int8_t pps_cr_qp_offset;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t pps_slice_chroma_qp_offsets_present_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t weighted_pred_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t weighted_bipred_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t transquant_bypass_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t tiles_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t entropy_coding_sync_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only valid if tiles_enabled_flag is set. Ignored otherwise. */
+    /** Only valid if tiles_enabled_flag is set. Ignored otherwise. */
     uint8_t num_tile_columns_minus1;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only valid if tiles_enabled_flag is set. Ignored otherwise. */
+    /** Only valid if tiles_enabled_flag is set. Ignored otherwise. */
     uint8_t num_tile_rows_minus1;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only valid if tiles_enabled_flag is set. Ignored otherwise. */
+    /** Only valid if tiles_enabled_flag is set. Ignored otherwise. */
     uint8_t uniform_spacing_flag;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only need to set 0..num_tile_columns_minus1. The struct
+    /** Only need to set 0..num_tile_columns_minus1. The struct
         definition reserves up to the maximum of 22. Invalid values are
         ignored. */
     uint16_t column_width_minus1[22];
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only need to set 0..num_tile_rows_minus1. The struct
+    /** Only need to set 0..num_tile_rows_minus1. The struct
         definition reserves up to the maximum of 20. Invalid values are
         ignored.*/
     uint16_t row_height_minus1[20];
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only needed if tiles_enabled_flag is set. Invalid values are
+    /** Only needed if tiles_enabled_flag is set. Invalid values are
         ignored. */
     uint8_t loop_filter_across_tiles_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t pps_loop_filter_across_slices_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t deblocking_filter_control_present_flag;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only valid if deblocking_filter_control_present_flag is set. Ignored
+    /** Only valid if deblocking_filter_control_present_flag is set. Ignored
         otherwise. */
     uint8_t deblocking_filter_override_enabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only valid if deblocking_filter_control_present_flag is set. Ignored
+    /** Only valid if deblocking_filter_control_present_flag is set. Ignored
         otherwise. */
     uint8_t pps_deblocking_filter_disabled_flag;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only valid if deblocking_filter_control_present_flag is set and
+    /** Only valid if deblocking_filter_control_present_flag is set and
         pps_deblocking_filter_disabled_flag is not set. Ignored otherwise.*/
     int8_t pps_beta_offset_div2;
-    /** Copy of the Picture Parameter Set bitstream field.
-        Only valid if deblocking_filter_control_present_flag is set and
+    /** Only valid if deblocking_filter_control_present_flag is set and
         pps_deblocking_filter_disabled_flag is not set. Ignored otherwise. */
     int8_t pps_tc_offset_div2;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t lists_modification_present_flag;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t log2_parallel_merge_level_minus2;
-    /** Copy of the Picture Parameter Set bitstream field. */
     uint8_t slice_segment_header_extension_present_flag;
 
-    /** Slice Segment Header bitstream fields and calculated values. */
+    /** \name HEVC Slice Segment Header
+     *
+     * Copies of the HEVC Slice Segment Header bitstream fields and calculated
+     * values detailed in the specification.
+     * @{ */
     /** Set to 1 if nal_unit_type is equal to IDR_W_RADL or IDR_N_LP.
         Set to zero otherwise. */
     uint8_t IDRPicFlag;
     /** Set to 1 if nal_unit_type in the range of BLA_W_LP to
         RSV_IRAP_VCL23, inclusive. Set to zero otherwise.*/
     uint8_t RAPPicFlag;
-    /** Copy of specification field, CurrRpsIdx, see 7.4.7.1. */
+    /** See section 7.4.7.1 of the specification. */
     uint8_t CurrRpsIdx;
-    /** Copy of specification field, see Section 7.4.7.2 of the
-        H.265/HEVC Specification. */
+    /** See section 7.4.7.2 of the specification. */
     uint32_t NumPocTotalCurr;
     /** Corresponds to specification field, NumDeltaPocs[RefRpsIdx].
         Only applicable when short_term_ref_pic_set_sps_flag == 0.
@@ -3343,6 +3261,7 @@ typedef struct {
         of bits used for the contents of the block beginning with
         "if(long_term_ref_pics_present_flag)". */
     uint32_t NumLongTermPictureSliceHeaderBits;
+    /** @} */
 
     /** Slice Decoding Process - Picture Order Count */
     /** The value of PicOrderCntVal of the picture in the access unit
