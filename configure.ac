@@ -56,11 +56,9 @@ AC_ARG_ENABLE(documentation, AS_HELP_STRING([--disable-documentation], [Disable 
 if test "x$DOCS" != xno; then
     AC_CHECK_TOOL([DOXYGEN], [doxygen], [no])
     AC_CHECK_TOOL([DOT], [dot], [no])
-    AC_CHECK_TOOL([PDFTEX], [pdftex], [no])
 else
     DOXYGEN=no
     DOT=no
-    PDFTEX=no
 fi
 if test "x$DOCS" = xyes; then
     if test "x$DOXYGEN" = xno; then
@@ -69,11 +67,8 @@ if test "x$DOCS" = xyes; then
     if test "x$DOT" = xno; then
         AC_ERROR([Documentation enabled but dot was not found in your path.  Please install graphviz])
     fi
-    if test "x$PDFTEX" = xno; then
-        AC_ERROR([Documentation enabled but pdftex was not found in your path])
-    fi
 fi
-AM_CONDITIONAL([ENABLE_DOCS], [test "x$DOXYGEN" != xno -a "x$DOT" != xno -a "x$PDFTEX" != xno])
+AM_CONDITIONAL([ENABLE_DOCS], [test "x$DOXYGEN" != xno -a "x$DOT" != xno])
 AC_SUBST(DOXYGEN)
 
 # Options
