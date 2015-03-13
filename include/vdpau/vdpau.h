@@ -3201,13 +3201,13 @@ typedef struct {
     /** Only valid if tiles_enabled_flag is set. Ignored otherwise. */
     uint8_t uniform_spacing_flag;
     /** Only need to set 0..num_tile_columns_minus1. The struct
-        definition reserves up to the maximum of 22. Invalid values are
-        ignored. */
-    uint16_t column_width_minus1[22];
-    /** Only need to set 0..num_tile_rows_minus1. The struct
         definition reserves up to the maximum of 20. Invalid values are
+        ignored. */
+    uint16_t column_width_minus1[20];
+    /** Only need to set 0..num_tile_rows_minus1. The struct
+        definition reserves up to the maximum of 22. Invalid values are
         ignored.*/
-    uint16_t row_height_minus1[20];
+    uint16_t row_height_minus1[22];
     /** Only needed if tiles_enabled_flag is set. Invalid values are
         ignored. */
     uint8_t loop_filter_across_tiles_enabled_flag;
