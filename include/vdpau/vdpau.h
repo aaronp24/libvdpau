@@ -2485,15 +2485,15 @@ typedef uint32_t VdpDecoderProfile;
 #define VDP_DECODER_PROFILE_H264_HIGH_444_PREDICTIVE    ((VdpDecoderProfile)26)
 /** \hideinitializer */
 /** \brief MPEG-H Part 2 == H.265 == HEVC */
-#define VDP_DECODER_PROFILE_HEVC_MAIN                   ((VdpDecoderProfile)50)
+#define VDP_DECODER_PROFILE_HEVC_MAIN                   ((VdpDecoderProfile)100)
 /** \hideinitializer */
-#define VDP_DECODER_PROFILE_HEVC_MAIN_10                ((VdpDecoderProfile)51)
+#define VDP_DECODER_PROFILE_HEVC_MAIN_10                ((VdpDecoderProfile)101)
 /** \hideinitializer */
-#define VDP_DECODER_PROFILE_HEVC_MAIN_STILL             ((VdpDecoderProfile)52)
+#define VDP_DECODER_PROFILE_HEVC_MAIN_STILL             ((VdpDecoderProfile)102)
 /** \hideinitializer */
-#define VDP_DECODER_PROFILE_HEVC_MAIN_12                ((VdpDecoderProfile)53)
+#define VDP_DECODER_PROFILE_HEVC_MAIN_12                ((VdpDecoderProfile)103)
 /** \hideinitializer */
-#define VDP_DECODER_PROFILE_HEVC_MAIN_444               ((VdpDecoderProfile)54)
+#define VDP_DECODER_PROFILE_HEVC_MAIN_444               ((VdpDecoderProfile)104)
 
 /** \hideinitializer */
 #define VDP_DECODER_LEVEL_MPEG1_NA 0
