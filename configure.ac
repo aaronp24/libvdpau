@@ -5,6 +5,10 @@ AM_INIT_AUTOMAKE([dist-bzip2 foreign])
 
 AC_CONFIG_HEADERS(config.h)
 
+# Check for secure_getenv
+AC_USE_SYSTEM_EXTENSIONS
+AC_CHECK_FUNCS([__secure_getenv secure_getenv])
+
 # Disable static libraries by default.  Use --enable-static if you really want
 # them.
 AC_DISABLE_STATIC

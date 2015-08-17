@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 NVIDIA, Corporation
+ * Copyright (c) 2008-2015 NVIDIA Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,7 @@
 #include "mesa_dri2.h"
 #include <X11/Xlib.h>
 #endif
+#include "util.h"
 
 typedef void SetDllHandle(
     void * driver_dll_handle
@@ -117,7 +118,12 @@ static VdpStatus _vdp_open_driver(
     char const * vdpau_trace;
     char const * func_name;
 
-    vdpau_driver = getenv("VDPAU_DRIVER");
+    vdpau_driver = secure_getenv("VDPAU_DRIVER");
+    if (vdpau_driver) {
+        if (strchr(vdpau_driver, '/')) {
+            vdpau_driver = NULL;
+        }
+    }
     if (!vdpau_driver) {
         vdpau_driver = vdpau_driver_dri2 =
             _vdp_get_driver_name_from_dri2(display, screen);
@@ -126,15 +132,13 @@ static VdpStatus _vdp_open_driver(
         vdpau_driver = "nvidia";
     }
 
-    if (geteuid() == getuid()) {
-        /* don't allow setuid apps to use VDPAU_DRIVER_PATH */
-        vdpau_driver_path = getenv("VDPAU_DRIVER_PATH");
-        if (vdpau_driver_path &&
-            snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib),
-                     DRIVER_LIB_FORMAT, vdpau_driver_path, vdpau_driver) <
-                sizeof(vdpau_driver_lib)) {
-            _vdp_driver_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
-        }
+    /* Don't allow setuid apps to use VDPAU_DRIVER_PATH */
+    vdpau_driver_path = secure_getenv("VDPAU_DRIVER_PATH");
+    if (vdpau_driver_path &&
+        snprintf(vdpau_driver_lib, sizeof(vdpau_driver_lib),
+                 DRIVER_LIB_FORMAT, vdpau_driver_path, vdpau_driver) <
+            sizeof(vdpau_driver_lib)) {
+        _vdp_driver_dll = dlopen(vdpau_driver_lib, RTLD_NOW | RTLD_GLOBAL);
     }
 
     /* Fallback to VDPAU_MODULEDIR when VDPAU_DRIVER_PATH is not set,
@@ -177,7 +181,7 @@ static VdpStatus _vdp_open_driver(
 
     _vdp_backend_dll = _vdp_driver_dll;
 
-    vdpau_trace = getenv("VDPAU_TRACE");
+    vdpau_trace = secure_getenv("VDPAU_TRACE");
     if (vdpau_trace && atoi(vdpau_trace)) {
         SetDllHandle * set_dll_handle;
 

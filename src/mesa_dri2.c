@@ -1,6 +1,6 @@
 /*
  * Copyright © 2008 Red Hat, Inc.
- * Copyright © 2010 NVIDIA Corporation
+ * Copyright © 2010-2015 NVIDIA Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Soft-
@@ -30,6 +30,7 @@
  * Authors:
  *   Kristian Høgsberg (krh@redhat.com)
  *   Modified for VDPAU by Aaron Plattner (aplattner@nvidia.com)
+ *   and José Hiram Soltren (jsoltren@nvidia.com)
  */
 
 
@@ -39,6 +40,7 @@
 #include <X11/extensions/extutil.h>
 #include <X11/extensions/dri2proto.h>
 #include "mesa_dri2.h"
+#include "util.h"
 
 static char dri2ExtensionName[] = DRI2_NAME;
 static XExtensionInfo *dri2Info;
@@ -130,7 +132,7 @@ _vdp_DRI2Connect(Display * dpy, XID window, char **driverName, char **deviceName
    req->driverType = DRI2DriverVDPAU;
 #ifdef DRI2DriverPrimeShift
    {
-      char *prime = getenv("DRI_PRIME");
+      char *prime = secure_getenv("DRI_PRIME");
       if (prime) {
          unsigned int primeid;
          errno = 0;

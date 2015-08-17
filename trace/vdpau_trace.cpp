@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2009 NVIDIA, Corporation
+ * Copyright (c) 2008-2015 NVIDIA Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <vdpau/vdpau_x11.h>
+
+#include "../src/util.h"
 
 #define _VDP_TRACE_ARSIZE(_x_) ((sizeof (_x_)) / (sizeof ((_x_)[0])))
 
@@ -4795,13 +4797,13 @@ VdpStatus vdp_trace_device_create_x11(
     }
     else {
         _vdp_cap_data.level = 0;
-        char const * vdpau_trace = getenv("VDPAU_TRACE");
+        char const * vdpau_trace = secure_getenv("VDPAU_TRACE");
         if (vdpau_trace) {
             _vdp_cap_data.level = atoi(vdpau_trace);
         }
 
         _vdp_cap_data.fp = 0;
-        char const * vdpau_trace_file = getenv("VDPAU_TRACE_FILE");
+        char const * vdpau_trace_file = secure_getenv("VDPAU_TRACE_FILE");
         if (vdpau_trace_file && strlen(vdpau_trace_file)) {
             if (vdpau_trace_file[0] == '&') {
                 int fd = atoi(&vdpau_trace_file[1]);

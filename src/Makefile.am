@@ -9,6 +9,7 @@ lib_LTLIBRARIES = libvdpau.la
 
 libvdpau_la_SOURCES = \
     vdpau_wrapper.c \
+    util.h \
     $(DRI2_SOURCES)
 
 if DRI2
