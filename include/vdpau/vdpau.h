@@ -1704,7 +1704,7 @@ typedef VdpStatus VdpVideoSurfacePutBitsYCbCr(
  * - The Hardware that implements \ref VdpPresentationQueue
  *   "VdpPresentationQueue" functionality,
  *
- * VdpVideoSurfaces are directly displayable using a \ref
+ * VdpOutputSurfaces are directly displayable using a \ref
  * VdpPresentationQueue "VdpPresentationQueue" object.
  *
  * @{
