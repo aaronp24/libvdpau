@@ -35,7 +35,7 @@ int main(void)
     // is trying to test for.
     int nOpenFDs = countOpenFDs();
     void *libXext = dlopen("libXext.so.6", RTLD_LAZY);
-    void *libvdpau = dlopen("../src/.libs/libvdpau.so", RTLD_LAZY);
+    void *libvdpau = dlopen("src/libvdpau.so", RTLD_LAZY);
     Display *dpy = XOpenDisplay(NULL);
     VdpDeviceCreateX11 *pvdp_device_create_x11;
     VdpDevice device;
