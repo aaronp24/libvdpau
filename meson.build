@@ -1,4 +1,4 @@
-project('libvdpau', 'c', 'cpp')
+project('libvdpau', 'c', 'cpp', meson_version : '>=0.40')
 cc = meson.get_compiler('c')
 
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
