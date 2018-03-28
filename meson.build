@@ -40,7 +40,7 @@ cdata.set10('DRI2', use_dri2)
 
 configure_file(output : 'config.h', configuration : cdata)
 add_project_arguments('-DHAVE_CONFIG_H', language : [ 'c', 'cpp' ])
-inc = include_directories('.')
+inc = include_directories(['.', 'include'])
 
 subdir('doc')
 subdir('include')
