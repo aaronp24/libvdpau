@@ -2701,7 +2701,7 @@ typedef VdpStatus VdpDecoderQueryProfileCapability(
     VdpDevice                   device,
     VdpDecoderProfile           profile,
     /* output parameters follow */
-    VdpDecoderCapability      capability,
+    VdpDecoderCapability        capability,
     void *                      capability_value
 );
 
@@ -4429,7 +4429,7 @@ typedef VdpStatus VdpPresentationQueueBlockUntilSurfaceIdle(
  * \brief The status of a surface within a presentation queue.
  */
 typedef enum {
-    /** The surface is no queued or currently visible. */
+    /** The surface is not queued or currently visible. */
     VDP_PRESENTATION_QUEUE_STATUS_IDLE,
     /** The surface is in the queue, and not currently visible. */
     VDP_PRESENTATION_QUEUE_STATUS_QUEUED,
