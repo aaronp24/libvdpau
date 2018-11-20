@@ -838,12 +838,65 @@ typedef int VdpBool;
  */
 typedef uint32_t VdpChromaType;
 
-/** \hideinitializer \brief 4:2:0 chroma format. */
+/** \hideinitializer \brief 4:2:0 chroma format. Undefined field/frame based
+ *  Video surfaces allocated with this chroma type have undefined
+ *  field/frame structure. The implementation is free to internally morph
+ *  the surface between frame/field(NV12/NV24) as required by
+ *  VdpVideoDecoder operation. Interop with OpenGL allows registration
+ *  of these surfaces for either field- or frame-based interop. But, an implicit
+ *  field/frame structure conversion may be performed.
+ */
 #define VDP_CHROMA_TYPE_420 ((VdpChromaType)0)
-/** \hideinitializer \brief 4:2:2 chroma format. */
+/** \hideinitializer \brief 4:2:2 chroma format. Undefined field/frame based
+ *  Video surfaces allocated with this chroma type have undefined
+ *  field/frame structure. The implementation is free to internally morph
+ *  the surface between frame/field(NV12/NV24) as required by
+ *  VdpVideoDecoder operation. Interop with OpenGL allows registration
+ *  of these surfaces for either field- or frame-based interop. But, an implicit
+ *  field/frame structure conversion may be performed.
+ */
 #define VDP_CHROMA_TYPE_422 ((VdpChromaType)1)
-/** \hideinitializer \brief 4:4:4 chroma format. */
+/** \hideinitializer \brief 4:4:4 chroma format. Undefined field/frame based
+ *  Video surfaces allocated with this chroma type have undefined
+ *  field/frame structure. The implementation is free to internally morph
+ *  the surface between frame/field(NV12/NV24) as required by
+ *  VdpVideoDecoder operation. Interop with OpenGL allows registration
+ *  of these surfaces for either field- or frame-based interop. But, an implicit
+ *  field/frame structure conversion may be performed.
+ */
 #define VDP_CHROMA_TYPE_444 ((VdpChromaType)2)
+
+/** \hideinitializer \brief 4:2:0 chroma format. Field based.
+ *  Video surfaces allocated with this chroma type can only be
+ *  interoped with OpenGL if the matching field/frame structure is
+ *  specified in the OpenGL API */
+#define VDP_CHROMA_TYPE_420_FIELD ((VdpChromaType)3)
+/** \hideinitializer \brief 4:2:2 chroma format. Field based.
+ *  Video surfaces allocated with this chroma type can only be
+ *  interoped with OpenGL if the matching field/frame structure is
+ *  specified in the OpenGL API */
+#define VDP_CHROMA_TYPE_422_FIELD ((VdpChromaType)4)
+/** \hideinitializer \brief 4:4:4 chroma format. Field based.
+ *  Video surfaces allocated with this chroma type can only be
+ *  interoped with OpenGL if the matching field/frame structure is
+ *  specified in the OpenGL API */
+#define VDP_CHROMA_TYPE_444_FIELD ((VdpChromaType)5)
+
+/** \hideinitializer \brief 4:2:0 chroma format. Frame based.
+ *  Video surfaces allocated with this chroma type can only be
+ *  interoped with OpenGL if the matching field/frame structure is
+ *  specified in the OpenGL API */
+#define VDP_CHROMA_TYPE_420_FRAME ((VdpChromaType)6)
+/** \hideinitializer \brief 4:2:2 chroma format. Frame based.
+ *  Video surfaces allocated with this chroma type can only be
+ *  interoped with OpenGL if the matching field/frame structure is
+ *  specified in the OpenGL API */
+#define VDP_CHROMA_TYPE_422_FRAME ((VdpChromaType)7)
+/** \hideinitializer \brief 4:4:4 chroma format. Frame based.
+ *  Video surfaces allocated with this chroma type can only be
+ *  interoped with OpenGL if the matching field/frame structure is
+ *  specified in the OpenGL API */
+#define VDP_CHROMA_TYPE_444_FRAME ((VdpChromaType)8)
 
 /**
  * \brief The set of all known YCbCr surface formats.
@@ -2620,6 +2673,38 @@ typedef uint32_t VdpDecoderProfile;
 /** \hideinitializer */
 #define VDP_DECODER_LEVEL_HEVC_6_2      186
 
+typedef enum {
+    VDP_VIDEO_SURFACE_FIELD_STRUCTURE         = (1 << 0),
+    VDP_VIDEO_SURFACE_FRAME_STRUCTURE         = (1 << 1)
+} VdpVideoSurfaceSupportedPictureStructure;
+
+typedef enum {
+    VDP_DECODER_PROFILE_MAX_LEVEL                      = 0,
+    VDP_DECODER_PROFILE_MAX_MACROBLOCKS                = 1,
+    VDP_DECODER_PROFILE_MAX_WIDTH                      = 2,
+    VDP_DECODER_PROFILE_MAX_HEIGHT                     = 3,
+    VDP_DECODER_PROFILE_SUPPORTED_PICTURE_STRUCTURE    = 4
+} VdpDecoderCapability;
+
+/**
+  * \brief Query the supported value of the requested capability, for
+  *       the specified profile on the specified device.
+  * \param[in] device The device to query.
+  * \param[in] profile The decoder profile for which information is requested.
+  * \param[in] capability The decoder profile capability for which the value
+  *       is requested.
+  * \param[out] capability_value The value of the requested capability.
+  * \return VdpStatus The completion status of the operation.
+  */
+
+typedef VdpStatus VdpDecoderQueryProfileCapability(
+    VdpDevice                   device,
+    VdpDecoderProfile           profile,
+    /* output parameters follow */
+    VdpDecoderCapability      capability,
+    void *                      capability_value
+);
+
 /**
  * \brief Query the implementation's VdpDecoder capabilities.
  * \param[in] device The device to query.
@@ -4344,7 +4429,7 @@ typedef VdpStatus VdpPresentationQueueBlockUntilSurfaceIdle(
  * \brief The status of a surface within a presentation queue.
  */
 typedef enum {
-    /** The surface is not queued or currently visible. */
+    /** The surface is no queued or currently visible. */
     VDP_PRESENTATION_QUEUE_STATUS_IDLE,
     /** The surface is in the queue, and not currently visible. */
     VDP_PRESENTATION_QUEUE_STATUS_QUEUED,
@@ -4587,6 +4672,8 @@ typedef uint32_t VdpFuncId;
 #define VDP_FUNC_ID_PRESENTATION_QUEUE_QUERY_SURFACE_STATUS                     ((VdpFuncId)65)
 /** \hideinitializer */
 #define VDP_FUNC_ID_PREEMPTION_CALLBACK_REGISTER                                ((VdpFuncId)66)
+/** \hideinitializer */
+#define VDP_FUNC_ID_DECODER_QUERY_CAPABILITY                                    ((VdpFuncId)67)
 
 #define VDP_FUNC_ID_BASE_WINSYS 0x1000
 
