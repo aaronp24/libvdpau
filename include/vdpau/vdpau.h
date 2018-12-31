@@ -983,6 +983,32 @@ typedef uint32_t VdpYCbCrFormat;
  * Applications should access this data via a uint32_t pointer.
  */
 #define VDP_YCBCR_FORMAT_V8U8Y8A8 ((VdpYCbCrFormat)5)
+/**
+ * \hideinitializer
+ * \brief The "Y_UV_444" YCbCr surface format.
+ *
+ * This format has two planes, a Y plane and a UV plane.
+ *
+ * The Y plane is an array of byte-sized Y components.
+ * Applications should access this data via a uint8_t pointer.
+ *
+ * The UV plane is an array of interleaved byte-sized U and V
+ * components, in the order U, V, U, V. Applications should
+ * access this data via a uint8_t pointer.
+ */
+#define VDP_YCBCR_FORMAT_Y_UV_444     ((VdpYCbCrFormat)6)
+/**
+ * \hideinitializer
+ * \brief The "Y_U_V_444" YCbCr surface format.
+ *
+ * This format has three planes, a Y plane, a V plane, and a U
+ * plane.
+ *
+ * Each of the planes is an array of byte-sized components.
+ *
+ * Applications should access this data via a uint8_t pointer.
+ */
+#define VDP_YCBCR_FORMAT_Y_U_V_444     ((VdpYCbCrFormat)7)
 
 /**
  * \brief  The set of all known RGB surface formats.
@@ -2683,7 +2709,15 @@ typedef enum {
     VDP_DECODER_PROFILE_MAX_MACROBLOCKS                = 1,
     VDP_DECODER_PROFILE_MAX_WIDTH                      = 2,
     VDP_DECODER_PROFILE_MAX_HEIGHT                     = 3,
-    VDP_DECODER_PROFILE_SUPPORTED_PICTURE_STRUCTURE    = 4
+    VDP_DECODER_PROFILE_SUPPORTED_PICTURE_STRUCTURE    = 4,
+    /**
+     * A list of supported chroma types, stored as a bitmask of 1 shifted
+     * by each supported VdpChromaType value.  E.g.,
+     *   (1 << VDP_CHROMA_TYPE_420) |
+     *   (1 << VDP_CHROMA_TYPE_422) |
+     *   (1 << VDP_CHROMA_TYPE_444)
+     */
+    VDP_DECODER_PROFILE_SUPPORTED_CHROMA_TYPES         = 5
 } VdpDecoderCapability;
 
 /**
@@ -3383,6 +3417,64 @@ typedef struct {
         correspond to positions in the RefPics array. */
     uint8_t RefPicSetLtCurr[8];
 } VdpPictureInfoHEVC;
+
+/**
+ * \brief Picture parameter information for an HEVC 444 picture.
+ *
+ * Note: VDPAU clients must use VdpPictureInfoHEVC444 to describe the
+ * attributes of a frame being decoded with
+ * VDP_DECODER_PROFILE_HEVC_MAIN_444.
+ */
+typedef struct {
+    /** \ref VdpPictureInfoHEVC struct. */
+    VdpPictureInfoHEVC pictureInfo;
+
+    /* SPS Range Extensions for Main 444, Main 10, etc. */
+    uint8_t sps_range_extension_flag;
+    /* sps extension for transform_skip_rotation_enabled_flag */
+    uint8_t transformSkipRotationEnableFlag;
+    /* sps extension for transform_skip_context_enabled_flag */
+    uint8_t transformSkipContextEnableFlag;
+    /* sps implicit_rdpcm_enabled_flag */
+    uint8_t implicitRdpcmEnableFlag;
+    /* sps explicit_rdpcm_enabled_flag */
+    uint8_t explicitRdpcmEnableFlag;
+    /* sps extended_precision_processing_flag,always 0 in current profile */
+    uint8_t extendedPrecisionProcessingFlag;
+    /* sps intra_smoothing_disabled_flag */
+    uint8_t intraSmoothingDisabledFlag;
+    /* sps high_precision_offsets_enabled_flag */
+    uint8_t highPrecisionOffsetsEnableFlag;
+    /* sps persistent_rice_adaptation_enabled_flag */
+    uint8_t persistentRiceAdaptationEnableFlag;
+    /* sps cabac_bypass_alignment_enabled_flag, always 0 in current profile */
+    uint8_t cabacBypassAlignmentEnableFlag;
+    /* sps intraBlockCopyEnableFlag, always 0 not used by the spec as of now */
+    uint8_t intraBlockCopyEnableFlag;
+
+    /* PPS Range Extensions for Main 444, Main 10, etc. */
+    uint8_t pps_range_extension_flag;
+    /* pps extension log2_max_transform_skip_block_size_minus2, 0...5 */
+    uint8_t log2MaxTransformSkipSize;
+    /* pps cross_component_prediction_enabled_flag */
+    uint8_t crossComponentPredictionEnableFlag;
+    /* pps chroma_qp_adjustment_enabled_flag */
+    uint8_t chromaQpAdjustmentEnableFlag;
+    /* pps diff_cu_chroma_qp_adjustment_depth, 0...3 */
+    uint8_t diffCuChromaQpAdjustmentDepth;
+    /* pps chroma_qp_adjustment_table_size_minus1+1, 1...6 */
+    uint8_t chromaQpAdjustmentTableSize;
+    /* pps log2_sao_offset_scale_luma, max(0,bitdepth-10), */
+    /* maxBitdepth 16 for future. */
+    uint8_t log2SaoOffsetScaleLuma;
+    /* pps log2_sao_offset_scale_chroma */
+    uint8_t log2SaoOffsetScaleChroma;
+    /* -[12,+12] */
+    int8_t cb_qp_adjustment[6];
+    /* -[12,+12] */
+    int8_t cr_qp_adjustment[6];
+
+} VdpPictureInfoHEVC444;
 
 /**
  * \brief Decode a compressed field/frame and render the result
