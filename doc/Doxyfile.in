@@ -779,6 +779,10 @@ GENERATE_TREEVIEW      = NO
 
 TREEVIEW_WIDTH         = 250
 
+# Don't timestamp the files at build time, as it makes the build unreproducible.
+
+HTML_TIMESTAMP = NO
+
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
 #---------------------------------------------------------------------------
