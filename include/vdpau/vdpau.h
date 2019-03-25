@@ -1761,8 +1761,7 @@ typedef VdpStatus VdpVideoSurfacePutBitsYCbCr(
 /*@}*/
 
 /**
- * \defgroup VdpOutputSurface VdpOutputSurface; Output Surface \
- * object
+ * \defgroup VdpOutputSurface VdpOutputSurface; Output Surface object
  *
  * A VdpOutputSurface stores RGBA data in a defined format.
  *
@@ -2067,8 +2066,7 @@ typedef VdpStatus VdpOutputSurfacePutBitsYCbCr(
 /*@}*/
 
 /**
- * \defgroup VdpBitmapSurface VdpBitmapSurface; Bitmap Surface \
- * object
+ * \defgroup VdpBitmapSurface VdpBitmapSurface; Bitmap Surface object
  *
  * A VdpBitmapSurface stores RGBA data in a defined format.
  *
@@ -2215,8 +2213,7 @@ typedef VdpStatus VdpBitmapSurfacePutBitsNative(
 /*@}*/
 
 /**
- * \defgroup VdpOutputSurfaceRender VdpOutputSurface Rendering \
- *           Functionality
+ * \defgroup VdpOutputSurfaceRender VdpOutputSurface Rendering Functionality
  *
  * \ref VdpOutputSurface "VdpOutputSurface" objects
  * directly provide some rendering/compositing operations. These
@@ -3505,8 +3502,7 @@ typedef VdpStatus VdpDecoderRender(
 /*@}*/
 
 /**
- * \defgroup VdpVideoMixer VdpVideoMixer; Video Post-processing \
- *           and Compositing object
+ * \defgroup VdpVideoMixer VdpVideoMixer; Video Post-processing and Compositing object
  *
  * VdpVideoMixer can perform some subset of the following
  * post-processing steps on video:
@@ -4307,8 +4303,7 @@ typedef VdpStatus VdpVideoMixerRender(
 /*@}*/
 
 /**
- * \defgroup VdpPresentationQueue VdpPresentationQueue; Video \
- *           presentation (display) object
+ * \defgroup VdpPresentationQueue VdpPresentationQueue; Video presentation (display) object
  *
  * The VdpPresentationQueue manages a queue of surfaces and
  * associated timestamps. For each surface in the queue, once
