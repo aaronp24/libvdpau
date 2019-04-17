@@ -1,13 +1,24 @@
-image: docker:latest
-services:
-    - docker:dind
+image: archlinux/base:latest
 
-before_script:
-    - echo FROM nwnk/xserver-travis-rawhide:v5 > Dockerfile
-    - echo ADD . /root >> Dockerfile
-    - echo WORKDIR /root >> Dockerfile
-    - docker build -t withgit .
+stages:
+ - build
+ - deploy
 
-job:
-    script:
-        - docker run --volume $HOME/.ccache:/root/.ccache withgit ./test/gitlab-ci.sh
+build:
+  stage: build
+  script:
+      - pacman --noconfirm -Sy gcc meson ninja pkg-config doxygen graphviz texlive-bin
+      - ./test/gitlab-ci.sh
+  artifacts:
+    paths:
+      - public
+
+pages:
+  stage: deploy
+  script:
+    - echo "Nothing to do"
+  artifacts:
+    paths:
+      - public
+  only:
+   - master
