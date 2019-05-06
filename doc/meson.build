@@ -9,8 +9,7 @@ if doc_option != 'false' and doxygen.found() and dot.found()
     doxyfile = configure_file(
         input : 'Doxyfile.in',
         output : 'Doxyfile',
-        configuration : cdata,
-        install : false
+        configuration : cdata
     )
 
     html = custom_target('libvdpau-docs',
