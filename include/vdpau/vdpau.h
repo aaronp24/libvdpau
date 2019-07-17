@@ -2560,6 +2560,14 @@ typedef uint32_t VdpDecoderProfile;
 /** \brief Support for 8 bit depth only */
 #define VDP_DECODER_PROFILE_H264_HIGH_444_PREDICTIVE    ((VdpDecoderProfile)26)
 /** \hideinitializer */
+#define VDP_DECODER_PROFILE_VP9_PROFILE_0               ((VdpDecoderProfile)27)
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_VP9_PROFILE_1               ((VdpDecoderProfile)28)
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_VP9_PROFILE_2               ((VdpDecoderProfile)29)
+/** \hideinitializer */
+#define VDP_DECODER_PROFILE_VP9_PROFILE_3               ((VdpDecoderProfile)30)
+/** \hideinitializer */
 /** \brief MPEG-H Part 2 == H.265 == HEVC */
 #define VDP_DECODER_PROFILE_HEVC_MAIN                   ((VdpDecoderProfile)100)
 /** \hideinitializer */
@@ -2663,6 +2671,9 @@ typedef uint32_t VdpDecoderProfile;
 
 /** \hideinitializer */
 #define VDP_DECODER_LEVEL_DIVX_NA 0
+
+/** \hideinitializer */
+#define VDP_DECODER_LEVEL_VP9_L1 1
 
 /**
  * The VDPAU H.265/HEVC decoder levels correspond to the values of
@@ -3201,6 +3212,66 @@ typedef VdpPictureInfoMPEG4Part2 VdpPictureInfoDivX4;
  * parameter structure is re-used.
  */
 typedef VdpPictureInfoMPEG4Part2 VdpPictureInfoDivX5;
+
+typedef struct
+{
+    unsigned int width;
+    unsigned int height;
+
+    //Frame Indices
+    VdpVideoSurface lastReference;
+    VdpVideoSurface goldenReference;
+    VdpVideoSurface altReference;
+
+    unsigned char colorSpace;
+
+    unsigned short profile;
+    unsigned short frameContextIdx;
+    unsigned short keyFrame;
+    unsigned short showFrame;
+    unsigned short errorResilient;
+    unsigned short frameParallelDecoding;
+    unsigned short subSamplingX;
+    unsigned short subSamplingY;
+    unsigned short intraOnly;
+    unsigned short allowHighPrecisionMv;
+    unsigned short refreshEntropyProbs;
+
+    unsigned char  refFrameSignBias[4];
+
+    unsigned char bitDepthMinus8Luma;
+    unsigned char bitDepthMinus8Chroma;
+    unsigned char loopFilterLevel;
+    unsigned char loopFilterSharpness;
+
+    unsigned char modeRefLfEnabled;
+    unsigned char log2TileColumns;
+    unsigned char log2TileRows;
+
+    unsigned char segmentEnabled;
+    unsigned char segmentMapUpdate;
+    unsigned char segmentMapTemporalUpdate;
+    unsigned char segmentFeatureMode;
+
+    unsigned char segmentFeatureEnable[8][4];
+    short         segmentFeatureData[8][4];
+    unsigned char mbSegmentTreeProbs[7];
+    unsigned char segmentPredProbs[3];
+    unsigned char reservedSegment16Bits[2];
+
+    int qpYAc;
+    int qpYDc;
+    int qpChDc;
+    int qpChAc;
+
+    unsigned int activeRefIdx[3];
+    unsigned int resetFrameContext;
+    unsigned int mcompFilterType;
+    unsigned int mbRefLfDelta[4];
+    unsigned int mbModeLfDelta[2];
+    unsigned int uncompressedHeaderSize;
+    unsigned int compressedHeaderSize;
+} VdpPictureInfoVP9;
 
 /**
  * \brief Picture parameter information for an H.265/HEVC picture.
